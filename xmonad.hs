@@ -42,8 +42,8 @@ import qualified Data.Map as M
 myTerminal      = "xterm -e screen"
 -- mod4Mask is Windows key, mod1Mask is alt
 modMask' :: KeyMask
--- modMask' = mod4Mask
-modMask' = mod1Mask 
+modMask' = mod4Mask
+-- modMask' = mod1Mask 
 myWorkspaces    = ["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","NSP"]
 myStatusBar = "/home/cwills/.xmonad/statusbar.sh"
 myClockBar = "/home/cwills/.xmonad/clockbar.sh"
