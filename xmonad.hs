@@ -106,16 +106,30 @@ manageHook' = myNSManageHook scratchpads <+> composeAll
         myWebClassNames    = ["Navigator","Shiretoko","Firefox","Uzbl","uzbl","Uzbl-core","uzbl-core","Google-chrome","Chromium","Shredder","Mail"]
         myDevClassNames    = ["Eclipse","eclipse","Netbeans","Gvim"]
         myWineClassNames   = ["Wine"]
-        
+       
+        isElementOfPropList :: Query String -> [String] -> Query Bool
         isElementOfPropList prop l = prop >>= \s -> return (s `elem` l)
+
+        --isElementOfPropListGen :: [(Query String, [String])] -> Query Bool
         
+
+
+
+        isIgnore :: Query Bool
         isIgnore = isElementOfPropList resource myIgnoreResources
+       
+        isNormalFloat :: Query Bool
         isNormalFloat  = isElementOfPropList className myNormalFloatClassNames
+       
+        isCenterFloat :: Query Bool
         isCenterFloat = isElementOfPropList name myCenterFloatNames >>= \x ->
                         isElementOfPropList className myFloatClassNames >>= \y ->
                         return (x || y)
+        isWeb :: Query Bool
         isWeb = isElementOfPropList className myWebClassNames
+        isDev :: Query Bool 
         isDev = isElementOfPropList className myDevClassNames
+        isWine :: Query Bool
         isWine = isElementOfPropList className myWineClassNames
         
 
