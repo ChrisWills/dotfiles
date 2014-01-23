@@ -38,6 +38,7 @@ import XMonad.Util.Run
 import XMonad.Util.Scratchpad (scratchpadSpawnAction, scratchpadManageHook, scratchpadFilterOutWorkspace)
 import qualified XMonad.StackSet as W
 import qualified Data.Map as M
+import Graphics.X11.Xlib.Display
 --}}}
 -- Config {{{
 terminal'      = "xterm -e screen"
@@ -86,11 +87,11 @@ myNSManageHook s =
 ---}}}
 -- Hooks {{{
 manageHook' :: ManageHook
-manageHook' = myNSManageHook scratchpads <+> composeAll 
-    [ isIgnore      --> doIgnore 
-    , isCenterFloat --> doCenterFloat  
-    , isNormalFloat --> doFloat  
-    , isFullscreen  --> myDoFullFloat                           
+manageHook' = myNSManageHook scratchpads <+> composeOne 
+    [ isIgnore      -?> doIgnore 
+    , isCenterFloat -?> doCenterFloat  
+    , isNormalFloat -?> doFloat  
+    , isFullscreen  -?> myDoFullFloat                           
     --, isWeb         --> doShift  "3:web"
     --, isDev         --> doShift  "4:dev"
     --, isWine        --> doF(W.shift "6:wine")
@@ -99,7 +100,7 @@ manageHook' = myNSManageHook scratchpads <+> composeAll
         role      = stringProperty "WM_WINDOW_ROLE"
         name      = stringProperty "WM_NAME"
         
-        myFloatClassNames  = ["Zenity","VirtualBox","Xmessage","Save As...","XFontSel","Downloads","Nm-connection-editor","XVroot", "qemu","artha","Artha"]
+        myCenterFloatClassNames  = ["Zenity","VirtualBox","Xmessage","Save As...","XFontSel","Downloads","Nm-connection-editor","XVroot", "qemu","artha","Artha"]
         myNormalFloatClassNames = ["Gimp","ij-ImageJ"]
         myIgnoreResources = ["desktop","desktop_window","notify-osd","stalonetray","trayer"]
         myCenterFloatNames   = ["bashrun","Google Chrome Options","Chromium Options"]
@@ -107,36 +108,38 @@ manageHook' = myNSManageHook scratchpads <+> composeAll
         myDevClassNames    = ["Eclipse","eclipse","Netbeans","Gvim"]
         myWineClassNames   = ["Wine"]
        
-        isElementOfPropList :: Query String -> [String] -> Query Bool
-        isElementOfPropList prop l = prop >>= \s -> return (s `elem` l)
-
-        --isElementOfPropListGen :: [(Query String, [String])] -> Query Bool
+        isElHelper :: Query Bool -> (Query String, [String]) -> Query Bool
+        isElHelper acc (prop, l) =
+            prop >>= \s ->
+            acc  >>= \a ->
+                return (a || (s `elem` l))
         
-
-
+        isElementOfPropListGen :: [(Query String, [String])] -> Query Bool
+        isElementOfPropListGen [] = return False
+        isElementOfPropListGen tl = foldl isElHelper (return False) tl 
 
         isIgnore :: Query Bool
-        isIgnore = isElementOfPropList resource myIgnoreResources
+        isIgnore = isElementOfPropListGen [(resource, myIgnoreResources)]
        
         isNormalFloat :: Query Bool
-        isNormalFloat  = isElementOfPropList className myNormalFloatClassNames
-       
+        isNormalFloat  = isElementOfPropListGen [(className, myNormalFloatClassNames)]
+
         isCenterFloat :: Query Bool
-        isCenterFloat = isElementOfPropList name myCenterFloatNames >>= \x ->
-                        isElementOfPropList className myFloatClassNames >>= \y ->
-                        return (x || y)
+        isCenterFloat = isElementOfPropListGen [(name, myCenterFloatNames)
+                                               ,(className, myCenterFloatClassNames)]
+
         isWeb :: Query Bool
-        isWeb = isElementOfPropList className myWebClassNames
-        isDev :: Query Bool 
-        isDev = isElementOfPropList className myDevClassNames
-        isWine :: Query Bool
-        isWine = isElementOfPropList className myWineClassNames
+        isWeb = isElementOfPropListGen [(className, myWebClassNames)]
         
+        isDev :: Query Bool 
+        isDev = isElementOfPropListGen [(className, myDevClassNames)]
+        
+        isWine :: Query Bool
+        isWine = isElementOfPropListGen [(className, myWineClassNames)]       
 
-
--- a trick for fullscreen but stil allow focusing of other WSs
-myDoFullFloat :: ManageHook
-myDoFullFloat = doF W.focusDown <+> doFullFloat
+        -- a trick for fullscreen but stil allow focusing of other WSs
+        myDoFullFloat :: ManageHook
+        myDoFullFloat = doF W.focusDown <+> doFullFloat
 
 -- Bar
 myLogHook :: Handle -> X ()
@@ -213,6 +216,14 @@ largeXPConfig = mXPConfig
                 }
 -- }}}
 -- Key mapping {{{
+showDimensions :: X ()                                                                                                                                               
+showDimensions = withDisplay $ f 
+    where f dpy =  
+            let dscreen = defaultScreen dpy in
+            spawn ("xmessage screen dim: " ++ (show (displayHeight dpy dscreen))
+                                           ++ "x"
+                                           ++ (show (displayWidth dpy dscreen)))
+
 keys' = \c -> mkKeymap c $
     [   ("M-<Return>", spawn $ XMonad.terminal c)
     ,   ("M-p", spawn "xterm")
@@ -255,6 +266,7 @@ keys' = \c -> mkKeymap c $
     ,   ("M-s", namedScratchpadAction scratchpads "volume")
     ,   ("M-i", namedScratchpadAction scratchpads "music")
     ,   ("M-w", namedScratchpadAction scratchpads "dict")
+    ,   ("M-u", showDimensions) 
     --,   ("M-S-<Space>", layoutScreens 3 (fixedLayout [(Rectangle 0 0 1360 768),(Rectangle 1360 0 1280 1024),(Rectangle 2640 0 1280 1024)]))
     --,   ("M-C-S-<Space>", rescreen)
     ]
@@ -272,6 +284,9 @@ keys' = \c -> mkKeymap c $
     ]
 --}}}
 -- Main {{{
+
+startupHook' = ewmhDesktopsStartup >> setWMName "LG3D"
+
 
 
 main = do
@@ -292,7 +307,7 @@ main = do
       , workspaces          = workspaces'
       , keys                = keys'
       , modMask             = modMask'
-      , startupHook         = ewmhDesktopsStartup >> setWMName "LG3D" 
+      , startupHook         = startupHook'
       , layoutHook          = layoutHook'
       , manageHook          = manageHook'
       , logHook             = myLogHook dzenTopBar >> fadeInactiveLogHook 0xdddddddd  >> setWMName "LG3D"
