@@ -11,13 +11,11 @@ import XMonad.Hooks.FadeInactive
 import XMonad.Hooks.ManageDocks
 import XMonad.Hooks.ManageHelpers
 import XMonad.Hooks.SetWMName
-import XMonad.Hooks.SetWMName
 import XMonad.Hooks.UrgencyHook
 import XMonad.Layout.Gaps
 import XMonad.Layout.Grid
 import XMonad.Layout.IM
 import XMonad.Layout.MouseResizableTile
-import XMonad.Layout.NoBorders
 import XMonad.Layout.NoBorders (smartBorders, noBorders)
 import XMonad.Layout.PerWorkspace (onWorkspace)
 import XMonad.Layout.Reflect (reflectHoriz)
@@ -36,6 +34,7 @@ import XMonad.Util.EZConfig
 import XMonad.Util.NamedScratchpad
 import XMonad.Util.Run
 import XMonad.Util.Scratchpad (scratchpadSpawnAction, scratchpadManageHook, scratchpadFilterOutWorkspace)
+import XMonad.Util.SpawnOnce
 import qualified XMonad.StackSet as W
 import qualified Data.Map as M
 import Graphics.X11.Xlib.Display
@@ -142,29 +141,32 @@ manageHook' = myNSManageHook scratchpads <+> composeOne
         myDoFullFloat = doF W.focusDown <+> doFullFloat
 
 -- Bar
-myLogHook :: Handle -> X ()
-myLogHook h = dynamicLogWithPP $ defaultPP
-    {
-        ppCurrent           =   dzenColor colorYellow colorDarkGrey . pad
-      , ppVisible           =   dzenColor "white" colorDarkGrey . pad
-      , ppHidden            =   dzenColor "" "" . pad
-      , ppUrgent            =   dzenColor colorMedGrey colorYellow
-      , ppHiddenNoWindows   =   dzenColor colorMedGrey colorDarkGrey . pad
-      , ppWsSep             =   " "
-      , ppSep               =   "  |  "
-      , ppLayout            =   dzenColor colorYellow colorDarkGrey .
-                                (\x -> case x of
-                                    "ResizableTall"             ->      "^i(" ++ myBitmapsDir ++ "/tall.xbm)"
-                                    "Mirror ResizableTall"      ->      "^i(" ++ myBitmapsDir ++ "/mtall.xbm)"
-                                    "Full"                      ->      "^i(" ++ myBitmapsDir ++ "/full.xbm)"
-                                    "SimplestFloat"             ->      "~"
-                                    "Grid"                      ->      "^i(" ++ myBitmapsDir ++ "/grid.xbm)"
-                                    _                           ->      x
-                                )
-      , ppSort              = fmap (.namedScratchpadFilterOutWorkspace) $ ppSort defaultPP
-      , ppTitle             =   (" " ++) . dzenColor "white" colorDarkGrey . dzenEscape
-      , ppOutput            =   hPutStrLn h
-    }
+logHook' :: Handle -> X ()
+logHook' h = do 
+    dynamicLogWithPP $ defaultPP
+        {
+            ppCurrent           =   dzenColor colorYellow colorDarkGrey . pad
+          , ppVisible           =   dzenColor "white" colorDarkGrey . pad
+          , ppHidden            =   dzenColor "" "" . pad
+          , ppUrgent            =   dzenColor colorMedGrey colorYellow
+          , ppHiddenNoWindows   =   dzenColor colorMedGrey colorDarkGrey . pad
+          , ppWsSep             =   " "
+          , ppSep               =   "  |  "
+          , ppLayout            =   dzenColor colorYellow colorDarkGrey .
+                                    (\x -> case x of
+                                        "ResizableTall"             ->      "^i(" ++ myBitmapsDir ++ "/tall.xbm)"
+                                        "Mirror ResizableTall"      ->      "^i(" ++ myBitmapsDir ++ "/mtall.xbm)"
+                                        "Full"                      ->      "^i(" ++ myBitmapsDir ++ "/full.xbm)"
+                                        "SimplestFloat"             ->      "~"
+                                        "Grid"                      ->      "^i(" ++ myBitmapsDir ++ "/grid.xbm)"
+                                        _                           ->      x
+                                    )
+          , ppSort              = fmap (.namedScratchpadFilterOutWorkspace) $ ppSort defaultPP
+          , ppTitle             =   (" " ++) . dzenColor "white" colorDarkGrey . dzenEscape
+          , ppOutput            =   hPutStrLn h
+        }
+    fadeInactiveLogHook 0xdddddddd
+    setWMName "LG3D"
 -- Layout
 layoutHook' = avoidStruts $ 
     smartBorders tiled
@@ -216,13 +218,17 @@ largeXPConfig = mXPConfig
                 }
 -- }}}
 -- Key mapping {{{
-showDimensions :: X ()                                                                                                                                               
-showDimensions = withDisplay $ f 
-    where f dpy =  
-            let dscreen = defaultScreen dpy in
-            spawn ("xmessage screen dim: " ++ (show (displayHeight dpy dscreen))
-                                           ++ "x"
-                                           ++ (show (displayWidth dpy dscreen)))
+--getDefaultScreenWidth :: String 
+--getDefaultScreenWidth = withDisplay $ \dpy ->
+--    show (displayWidth dpy (defaultScreen dpy))
+--
+--getDefaultScreenHeight :: String 
+--getDefaultScreenHeight = 
+--    ask display >>= \dpy
+--    show (displayHeight dpy (defaultScreen dpy))
+--
+--showDimensions :: X ()                                                                                                                                               
+--showDimensions = spawn ("xmessage screen dim: " ++ getDefaultScreenHeight ++ "x" ++ getDefaultScreenWidth)
 
 keys' = \c -> mkKeymap c $
     [   ("M-<Return>", spawn $ XMonad.terminal c)
@@ -266,7 +272,7 @@ keys' = \c -> mkKeymap c $
     ,   ("M-s", namedScratchpadAction scratchpads "volume")
     ,   ("M-i", namedScratchpadAction scratchpads "music")
     ,   ("M-w", namedScratchpadAction scratchpads "dict")
-    ,   ("M-u", showDimensions) 
+--    ,   ("M-u", showDimensions) 
     --,   ("M-S-<Space>", layoutScreens 3 (fixedLayout [(Rectangle 0 0 1360 768),(Rectangle 1360 0 1280 1024),(Rectangle 2640 0 1280 1024)]))
     --,   ("M-C-S-<Space>", rescreen)
     ]
@@ -285,12 +291,8 @@ keys' = \c -> mkKeymap c $
 --}}}
 -- Main {{{
 
-startupHook' = ewmhDesktopsStartup >> setWMName "LG3D"
-
-
-
-main = do
-    dzenTopBar <- spawnPipe myStatusBar
+startupHook' = do 
+    
     spawn myClockBar
     spawn myTray 
     -- spawn "artha" -- moved to scratchpad
@@ -302,6 +304,13 @@ main = do
     spawn "xset r rate 200 60"
     spawn "feh --bg-fill /home/cwills/.wallpaper/current"
     spawn "xbacklight -set 70"
+    ewmhDesktopsStartup
+    setWMName "LG3D"
+    
+main = do
+    -- This is not in the startupHook because the logHook needs access to the
+    -- handle. It would be nice to pass this around instead somehow...
+    dzenStatusBarPipeHandle <- spawnPipe myStatusBar 
     xmonad $ myUrgencyHook $ defaultConfig
       { terminal            = terminal'
       , workspaces          = workspaces'
@@ -310,7 +319,7 @@ main = do
       , startupHook         = startupHook'
       , layoutHook          = layoutHook'
       , manageHook          = manageHook'
-      , logHook             = myLogHook dzenTopBar >> fadeInactiveLogHook 0xdddddddd  >> setWMName "LG3D"
+      , logHook             = logHook' dzenStatusBarPipeHandle 
       , normalBorderColor   = colorNormalBorder
       , focusedBorderColor  = colorFocusedBorder
 }
