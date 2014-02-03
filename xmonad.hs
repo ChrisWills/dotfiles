@@ -32,6 +32,7 @@ import Data.Functor
 --}}}
 -- Config {{{
 myBitmapsDir = "/home/cwills/.xmonad/dzen"
+
 terminal'      = "xterm -e screen"
 modMask' = mod4Mask -- alt and windows key are swapped with xmodmap later
 keys' c = mkKeymap c myKeymap
@@ -54,17 +55,7 @@ workspaces'    = map show [1 .. 15 :: Int] ++ ["NSP"]
 --            where i = W.tag $ W.workspace $ W.current ws
 --    g <- appEndo <$> userCodeDef (Endo id) (runQuery mh w) 
 --    windows (g .f)
-myUrgencyManageHook :: ManageHook
-myUrgencyManageHook =  do
-    ws <- currentWs
-    className =? "Pidgin" -->  doShift ws <+> doCenterFloat
 
-applyManageHook :: ManageHook -> Window -> X ()
-applyManageHook mh w = do
-    g <- appEndo <$> userCodeDef (Endo id) (runQuery mh w) 
-    windows g
-    
-myUrgencyHook = withUrgencyHook $ urgencyHook $ applyManageHook myUrgencyManageHook -- Highlight workspace where urgent windows lives 
 -- myScreenHack = layoutScreens 3 (fixedLayout [(Rectangle 0 0 1360 768),(Rectangle 1360 0 1280 1024),(Rectangle 2640 0 1280 1024)])
 --}}}
 -- Scratchpads {{{
@@ -96,17 +87,26 @@ myNSManageHook s =
 -- manageHook {{{
 doWindowPropsMatchHelper :: Query Bool -> (Query String, [String]) -> Query Bool
 doWindowPropsMatchHelper acc (prop, l) = do
-    s <- prop
-    a <- acc
+    s <- prop ; a <- acc
     return (a || (s `elem` l))
-
+    
+-- | This is a nice code compactor for managehooks. It allows us to match
+-- multiple window property types in a single list which allows for a
+-- one-to-one mapping of window-lists -> ManageHooks. It's hard to name this
+-- function susinctly; ignore the name and read the type sig.   
 doWindowPropsMatch :: [(Query String, [String])] -> Query Bool
 doWindowPropsMatch [] = return False
 doWindowPropsMatch xs = foldl doWindowPropsMatchHelper (return False) xs 
 
--- a trick for fullscreen but stil allow focusing of other WSs
+-- | A trick for fullscreen but stil allow focusing of other workspaces. 
 myDoFullFloat :: ManageHook
 myDoFullFloat = doF W.focusDown <+> doFullFloat
+
+-- | A trick for moving an urgent window to the current workspace.
+doInYoFace :: ManageHook
+doInYoFace = do
+    cws <- currentWs
+    doShift cws <+> doCenterFloat
 
 manageHook' :: ManageHook
 manageHook' = myNSManageHook scratchpads <+> composeOne 
@@ -119,23 +119,45 @@ manageHook' = myNSManageHook scratchpads <+> composeOne
     --, doWindowPropsMatch myWines      -?> doF(W.shift "6:wine")
     ] 
     where
-        role            = stringProperty "WM_WINDOW_ROLE"
-        name            = stringProperty "WM_NAME"
-        
         myIgnores       = [(resource,  ["desktop","desktop_window","notify-osd","stalonetray","trayer"])]
         myCenterFloats  = [(className, ["VirtualBox","Xmessage","Save As...","XFontSel","Downloads","Nm-connection-editor","qemu","artha"])
-                          ,(name,      ["Google Chrome Options","Chromium Options"])]
+                          ,(title,      ["Google Chrome Options","Chromium Options"])]
         myFloats        = [(className, ["Gimp","ij-ImageJ"])]
 --      myWebs          = [(className, ["Navigator","Shiretoko","Firefox","Uzbl","uzbl","Uzbl-core","uzbl-core","Google-chrome","Chromium","Shredder","Mail"])]
 --      myDevs          = [(className, ["Eclipse","eclipse","Netbeans","Gvim"])]
 --      myWines         = [(className, ["Wine"])]
+
+-- | This is the "ManageHook" that gets run on urgent windows. Any windows no
+-- caught by this manage hook are caught by logHook' and their workspace is
+-- highlighted in the Dzen topbar.
+myUrgencyManageHook :: ManageHook
+myUrgencyManageHook = composeOne
+    [ doWindowPropsMatch myUrgents -?> doInYoFace ]
+    where
+        myUrgents = [(className, ["Pidgin"])
+                    ,(title,     ["Testing"])]
+
+-- | Basically stolen from the 'manage' function in XMonad.Operations. It is
+-- yet to be seen whether we need to do any of the other stuff that the 'manage'
+-- function does before modifying the "WindowSet"
+applyManageHook :: ManageHook -> Window -> X ()
+applyManageHook mh w = do
+    g <- appEndo <$> userCodeDef (Endo id) (runQuery mh w) 
+    windows g
+
+-- | This is the thing that is passed into withUrgencyHook. We are utilizing
+-- the "do whatever you want manually" urgencyHook. Although it could be agrued
+-- that the above is a pretty standard thing that many people might like to do
+-- so consider submitting a patch. 
+myUrgencyHook :: (Window -> X ())
+myUrgencyHook = applyManageHook myUrgencyManageHook 
+
 -- }}}
 -- logHook {{{    
 logHook' :: X ()
 logHook' = do 
     mh <- getNamedPipe "dzenPipe" 
-    dynamicLogWithPP $ defaultPP
-        {
+    dynamicLogWithPP $ defaultPP {
             ppCurrent           =   dzenColor colorYellow colorDarkGrey . pad
           , ppVisible           =   dzenColor "white" colorDarkGrey . pad
           , ppHidden            =   dzenColor "" "" . pad
@@ -165,7 +187,7 @@ layoutHook' = avoidStruts $
     ||| smartBorders (Mirror tiled)
     ||| noBorders Full
     ||| smartBorders simplestFloat
-    ||| withIM (1%7) (Role "buddy_list") (smartBorders Grid) 
+    ||| withIM (1%7) (Role "buddy_list") (smartBorders Grid) -- It would be cool to be able to pass a ManageHook in directly here...patch? 
         where tiled   = ResizableTall 1 (2/100) (1/2) []
 --}}}
 -- Theme {{{
@@ -191,17 +213,15 @@ xftFont = "xft:inconsolata:pixelsize=18"
 --}}}
 -- Prompt Config {{{
 mXPConfig :: XPConfig
-mXPConfig =
-    defaultXPConfig { 
-                     font                  = xftFont
-                    , bgColor               = colorDarkGrey
-                    , fgColor               = colorLightGrey
-                    , bgHLight              = colorLightGrey
-                    , fgHLight              = colorDarkGrey
-                    , promptBorderWidth     = 0
-                    , height                = 20
-                    , historyFilter         = deleteConsecutive
-                    }
+mXPConfig = defaultXPConfig { 
+                  font                  = xftFont
+                , bgColor               = colorDarkGrey
+                , fgColor               = colorLightGrey
+                , bgHLight              = colorLightGrey
+                , fgHLight              = colorDarkGrey
+                , promptBorderWidth     = 0
+                , height                = 20
+                , historyFilter         = deleteConsecutive }
 -- }}}
 -- Key Map {{{
 myKeymap = 
@@ -255,7 +275,7 @@ myKeymap =
              zip workspaces' $ map show [1 .. 9] ++ ["0","<F1>","<F2>","<F3>","<F4>","<F5>","<F6>"]]
     ++
     [ ("M-" ++ [key], screenWorkspace scr >>= flip whenJust (windows . W.view))
-    	| (key, scr)  <- zip "dfg" [0,1,2] -- change to match your screen order
+    	| (key, scr)  <- zip "dfg" [0,1,2] -- change to match your screen order and number of screens
     ]
 --}}}
 -- StartupHook {{{
@@ -286,6 +306,6 @@ myConfig = defaultConfig {
               , normalBorderColor   = normalBorderColor'
               , focusedBorderColor  = focusedBorderColor' }
 
-main = xmonad $ myUrgencyHook myConfig
+main = xmonad $ withUrgencyHook myUrgencyHook myConfig
 --}}}
 -- vim:foldmethod=marker sw=4 sts=4 ts=4 tw=0 et ai nowrap
