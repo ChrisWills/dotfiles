@@ -3,59 +3,75 @@
 import System.Exit
 import System.IO
 import XMonad
-import XMonad.Actions.CycleWS
-import XMonad.Actions.WithAll
+import XMonad.Actions.WithAll (sinkAll)
 import XMonad.Hooks.DynamicLog
-import XMonad.Hooks.EwmhDesktops
 import XMonad.Hooks.FadeInactive
 import XMonad.Hooks.ManageDocks
 import XMonad.Hooks.ManageHelpers
 import XMonad.Hooks.SetWMName
 import XMonad.Hooks.UrgencyHook
-import XMonad.Layout.Gaps
 import XMonad.Layout.Grid
---import XMonad.Layout.IM
---import XMonad.Layout.MouseResizableTile
 import XMonad.Layout.NoBorders (smartBorders, noBorders)
---import XMonad.Layout.PerWorkspace (onWorkspace)
---import XMonad.Layout.Reflect (reflectHoriz)
 import XMonad.Layout.ResizableTile
-import XMonad.Layout.SimpleFloat
 import XMonad.Layout.SimplestFloat
-import XMonad.Layout.Spacing
-import XMonad.Layout.LayoutScreens
-import XMonad.Layout.TwoPane
-import XMonad.Operations
+import XMonad.Layout.IM
 import XMonad.Prompt 
 import XMonad.Prompt.Shell
-import XMonad.Util.EZConfig
+import XMonad.Util.EZConfig 
 import XMonad.Util.NamedScratchpad
 import XMonad.Util.Run
 import XMonad.Util.Scratchpad (scratchpadSpawnAction, scratchpadManageHook, scratchpadFilterOutWorkspace)
-import XMonad.Util.SpawnNamedPipe
+import XMonad.Util.SpawnNamedPipe -- This is mine, local build only
 import qualified XMonad.StackSet as W
 import Graphics.X11.Xlib.Display
 import Foreign.C.Types
---import XMonad.Prompt.AppendFile (appendFilePrompt)
---import XMonad.Prompt.RunOrRaise (runOrRaisePrompt)
---import qualified Data.Map as M
---import Data.Typeable
---import qualified XMonad.Util.ExtensibleState as XS
+import Data.Maybe
+import Data.Ratio ((%))
+import Data.Monoid          (Endo(..)) 
+import Data.Functor
 --}}}
 -- Config {{{
-terminal'      = "xterm -e screen"
-modMask' :: KeyMask
-modMask' = mod4Mask -- alt and windows key are swapped with xmodmap later
-workspaces'    = ["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","NSP"]
 myBitmapsDir = "/home/cwills/.xmonad/dzen"
-myUrgencyHook = withUrgencyHook NoUrgencyHook -- Highlight workspace where urgent windows lives 
+terminal'      = "xterm -e screen"
+modMask' = mod4Mask -- alt and windows key are swapped with xmodmap later
+keys' c = mkKeymap c myKeymap
+workspaces'    = map show [1 .. 15 :: Int] ++ ["NSP"]
+
+--myUHook w = withDisplay $ \d -> do
+--    sh <- io $ getWMNormalHints d w
+--
+--    let isFixedSize = sh_min_size sh /= Nothing && sh_min_size sh == sh_max_size sh
+--    isTransient <- isJust <$> io (getTransientForHint d w)
+--
+--    rr <- snd `fmap` floatLocation w
+--    -- ensure that float windows don't go over the edge of the screen
+--    let adjust (W.RationalRect x y wid h) | x + wid > 1 || y + h > 1 || x < 0 || y < 0
+--                                              = W.RationalRect (0.5 - wid/2) (0.5 - h/2) wid h
+--        adjust r = r
+--
+--        f ws | isFixedSize || isTransient = W.float w (adjust rr) . W.insertUp w . W.view i $ ws
+--             | otherwise                  = W.insertUp w ws
+--            where i = W.tag $ W.workspace $ W.current ws
+--    g <- appEndo <$> userCodeDef (Endo id) (runQuery mh w) 
+--    windows (g .f)
+myUrgencyManageHook :: ManageHook
+myUrgencyManageHook =  do
+    ws <- currentWs
+    className =? "Pidgin" -->  doShift ws <+> doCenterFloat
+
+applyManageHook :: ManageHook -> Window -> X ()
+applyManageHook mh w = do
+    g <- appEndo <$> userCodeDef (Endo id) (runQuery mh w) 
+    windows g
+    
+myUrgencyHook = withUrgencyHook $ urgencyHook $ applyManageHook myUrgencyManageHook -- Highlight workspace where urgent windows lives 
 -- myScreenHack = layoutScreens 3 (fixedLayout [(Rectangle 0 0 1360 768),(Rectangle 1360 0 1280 1024),(Rectangle 2640 0 1280 1024)])
 --}}}
 -- Scratchpads {{{
 scratchpads :: [NamedScratchpad]
 scratchpads = [
      NS "volume" "xterm -title Volume -xrm \"XTerm*allowTitleOps:false\" -e alsamixer" (title =? "Volume") 
-         (customFloating $ W.RationalRect (0) (1/48) (1/8) (47/48)) ,
+         (customFloating $ W.RationalRect 0 (1/48) (1/8) (47/48)) ,
 
      NS "music" "xterm -title Music -xrm \"XTerm*allowTitleOps:false\" -e ncmpc" (title =? "Music")
          (customFloating $ W.RationalRect (1/10) (2/10) (8/10) (6/10)) ,
@@ -71,22 +87,22 @@ myNSManageHook :: NamedScratchpads -> ManageHook
 myNSManageHook s =
     namedScratchpadManageHook s
     <+> composeOne
-            [ title =? "Music" -?> (ask >>= \w -> liftX (setOpacity w 0.7) >> idHook)
-            , title =? "Scratchpad" -?> (ask >>= \w -> liftX (setOpacity w 0.7) >> idHook)
-            , title =? "Volume" -?> (ask >>= \w -> liftX (setOpacity w 0.8) >> idHook)
-            --, title =? "Artha ~ The Open Thesaurus" -?> (ask >>= \w -> liftX (setOpacity w 0.8) >> idHook)
+            [ title =? "Music" -?> ask >>= \w -> liftX $ setOpacity w 0.7 >> idHook
+            , title =? "Scratchpad" -?> ask >>= \w -> liftX $ setOpacity w 0.7 >> idHook
+            , title =? "Volume" -?> ask >>= \w -> liftX $ setOpacity w 0.8 >> idHook
+            --, title =? "Artha ~ The Open Thesaurus" -?> ask >>= \w -> liftX $ setOpacity w 0.8 >> idHook
             ]
 ---}}}
 -- manageHook {{{
 doWindowPropsMatchHelper :: Query Bool -> (Query String, [String]) -> Query Bool
-doWindowPropsMatchHelper acc (prop, l) =
-    prop >>= \s ->
-    acc  >>= \a ->
-        return (a || (s `elem` l))
+doWindowPropsMatchHelper acc (prop, l) = do
+    s <- prop
+    a <- acc
+    return (a || (s `elem` l))
 
 doWindowPropsMatch :: [(Query String, [String])] -> Query Bool
 doWindowPropsMatch [] = return False
-doWindowPropsMatch tl = foldl doWindowPropsMatchHelper (return False) tl 
+doWindowPropsMatch xs = foldl doWindowPropsMatchHelper (return False) xs 
 
 -- a trick for fullscreen but stil allow focusing of other WSs
 myDoFullFloat :: ManageHook
@@ -106,38 +122,18 @@ manageHook' = myNSManageHook scratchpads <+> composeOne
         role            = stringProperty "WM_WINDOW_ROLE"
         name            = stringProperty "WM_NAME"
         
-        myIgnores       = [(resource,   ["desktop","desktop_window","notify-osd","stalonetray","trayer"])]
-        myCenterFloats  = [(className,  ["VirtualBox","Xmessage","Save As...","XFontSel","Downloads","Nm-connection-editor","qemu","artha"])
-                          ,(name,       ["Google Chrome Options","Chromium Options"])]
+        myIgnores       = [(resource,  ["desktop","desktop_window","notify-osd","stalonetray","trayer"])]
+        myCenterFloats  = [(className, ["VirtualBox","Xmessage","Save As...","XFontSel","Downloads","Nm-connection-editor","qemu","artha"])
+                          ,(name,      ["Google Chrome Options","Chromium Options"])]
         myFloats        = [(className, ["Gimp","ij-ImageJ"])]
-        -- myWebs    = [(className, ["Navigator","Shiretoko","Firefox","Uzbl","uzbl","Uzbl-core","uzbl-core","Google-chrome","Chromium","Shredder","Mail"])]
-        -- myDevs    = [(className, ["Eclipse","eclipse","Netbeans","Gvim"])]
-        -- myWines   = [(className, ["Wine"])]
+--      myWebs          = [(className, ["Navigator","Shiretoko","Firefox","Uzbl","uzbl","Uzbl-core","uzbl-core","Google-chrome","Chromium","Shredder","Mail"])]
+--      myDevs          = [(className, ["Eclipse","eclipse","Netbeans","Gvim"])]
+--      myWines         = [(className, ["Wine"])]
 -- }}}
--- StartupHook {{{
-startupHook' :: X ()
-startupHook' = do 
-    sw <- getDefaultScreenWidth
-    let myStatusBar = "dzen2 -x 0 -y '0' -h '16' -w " ++ show (sw - 326) ++ " -ta 'l' -fg '#FFFFFF' -bg '#161616' -fn '-*-bitstream vera sans-medium-r-normal-*-11-*-*-*-*-*-*-*'"
-    spawnNamedPipe myStatusBar "dzenPipe"
-    spawn ("/home/cwills/.xmonad/startup.sh " ++ show sw)
-    ewmhDesktopsStartup
-    setWMName "LG3D"
--- }}} 
 -- logHook {{{    
-getDefaultScreenWidth :: X (CInt) 
-getDefaultScreenWidth = withDisplay $ \dpy ->
-    return $ displayWidth dpy $ defaultScreen dpy
-
-writeToDzenHandle :: (Maybe Handle) -> String -> IO ()
-writeToDzenHandle mh str = do
-    case mh of
-        Just h -> hPutStrLn h str
-        Nothing -> return () 
-
 logHook' :: X ()
 logHook' = do 
-    mh <- getNamedPipeHandle "dzenPipe" 
+    mh <- getNamedPipe "dzenPipe" 
     dynamicLogWithPP $ defaultPP
         {
             ppCurrent           =   dzenColor colorYellow colorDarkGrey . pad
@@ -158,7 +154,7 @@ logHook' = do
                                     )
           , ppSort              = fmap (.namedScratchpadFilterOutWorkspace) $ ppSort defaultPP
           , ppTitle             =   (" " ++) . dzenColor "white" colorDarkGrey . dzenEscape
-          , ppOutput            = writeToDzenHandle mh 
+          , ppOutput            = maybe (\s -> return ()) hPutStrLn mh
         }
     fadeInactiveLogHook 0xdddddddd
     setWMName "LG3D"
@@ -169,7 +165,7 @@ layoutHook' = avoidStruts $
     ||| smartBorders (Mirror tiled)
     ||| noBorders Full
     ||| smartBorders simplestFloat
-    ||| smartBorders Grid 
+    ||| withIM (1%7) (Role "buddy_list") (smartBorders Grid) 
         where tiled   = ResizableTall 1 (2/100) (1/2) []
 --}}}
 -- Theme {{{
@@ -186,8 +182,8 @@ colorLightBlue       = "#afdfff"
 colorDarkGrey2       = "#262626"
 colorLightGrey       = "#a6a6a6"
 
-colorNormalBorder    = "#262626"
-colorFocusedBorder   = "#9F6C3B"
+normalBorderColor'    = "#262626"
+focusedBorderColor'   = "#9F6C3B"
 
 barFont  = "terminus"
 barXFont = "inconsolata:size=14"
@@ -206,22 +202,15 @@ mXPConfig =
                     , height                = 20
                     , historyFilter         = deleteConsecutive
                     }
- 
--- Run or Raise Menu
-largeXPConfig :: XPConfig
-largeXPConfig = mXPConfig
-                { font = xftFont
-                , height = 20
-                }
 -- }}}
--- Key mapping {{{
-keys' = \c -> mkKeymap c $
-    [   ("M-<Return>", spawn $ XMonad.terminal c)
+-- Key Map {{{
+myKeymap = 
+    [   ("M-<Return>", spawn $ XMonad.terminal myConfig)
     ,   ("M-p", spawn "xterm")
     ,   ("M-r", shellPrompt mXPConfig)
     ,   ("M-S-c", kill)
     ,   ("M-<Space>", sendMessage NextLayout)
-    --,   ("M-S-<Space>", setLayout $ XMonad.layoutHook c)
+    --,   ("M-S-<Space>", setLayout $ XMonad.layoutHook myConfig)
     ,   ("M-n", refresh)
     ,   ("M-<Tab>", windows W.focusDown)
     ,   ("M-j", windows W.focusDown)
@@ -241,7 +230,7 @@ keys' = \c -> mkKeymap c $
     ,   ("M-,", sendMessage (IncMasterN 1))
     ,   ("M-.", sendMessage (IncMasterN (-1)))
     ,   ("M-b", sendMessage ToggleStruts)
-    ,   ("M-S-q", spawn "/home/cwills/.xmonad/cleanup.sh" >> io (exitWith ExitSuccess))
+    ,   ("M-S-q", spawn "/home/cwills/.xmonad/cleanup.sh" >> io exitSuccess)
     ,   ("M-q", spawn "/home/cwills/.xmonad/cleanup.sh; xmonad --recompile; xmonad --restart")
     ,   ("<XF86AudioMute>", spawn "amixer set Master toggle")
     ,   ("<XF86AudioRaiseVolume>", spawn "amixer set Master 5%+ unmute")
@@ -259,29 +248,44 @@ keys' = \c -> mkKeymap c $
     ++
     [ ("M-S-" ++ key, (windows . W.shift) name)
          | (name, key) <-
-             zip workspaces' ["1","2","3","4","5","6","7","8","9","0","<F1>","<F2>","<F3>","<F4>","<F5>","<F6>"]]
+             zip workspaces' $ map show [1 .. 9] ++ ["0","<F1>","<F2>","<F3>","<F4>","<F5>","<F6>"]]
     ++
     [ ("M-" ++ key, (windows . W.greedyView) name)
          | (name, key) <-
-             zip workspaces' ["1","2","3","4","5","6","7","8","9","0","<F1>","<F2>","<F3>","<F4>","<F5>","<F6>"]]
+             zip workspaces' $ map show [1 .. 9] ++ ["0","<F1>","<F2>","<F3>","<F4>","<F5>","<F6>"]]
     ++
     [ ("M-" ++ [key], screenWorkspace scr >>= flip whenJust (windows . W.view))
     	| (key, scr)  <- zip "dfg" [0,1,2] -- change to match your screen order
     ]
 --}}}
+-- StartupHook {{{
+getDefaultScreenWidth :: X CInt 
+getDefaultScreenWidth = withDisplay $ \dpy ->
+    return $ displayWidth dpy $ defaultScreen dpy
+
+startupHook' :: X ()
+startupHook' = do
+    return ()
+    checkKeymap myConfig myKeymap
+    sw <- getDefaultScreenWidth
+    let myStatusBar = "dzen2 -x 0 -y '0' -h '16' -w " ++ show (sw - 326) ++ " -ta 'l' -fg '#FFFFFF' -bg '#161616' -fn '-*-bitstream vera sans-medium-r-normal-*-11-*-*-*-*-*-*-*'"
+    spawnNamedPipe myStatusBar "dzenPipe"
+    spawn ("/home/cwills/.xmonad/startup.sh " ++ show sw)
+    setWMName "LG3D"
+-- }}} 
 -- Main {{{
-main = do
-    xmonad $ myUrgencyHook $ defaultConfig
-      { terminal            = terminal'
-      , workspaces          = workspaces'
-      , keys                = keys'
-      , modMask             = modMask'
-      , startupHook         = startupHook'
-      , layoutHook          = layoutHook'
-      , manageHook          = manageHook'
-      , logHook             = logHook' 
-      , normalBorderColor   = colorNormalBorder
-      , focusedBorderColor  = colorFocusedBorder
-}
+myConfig = defaultConfig {
+                terminal            = terminal'
+              , workspaces          = workspaces'
+              , modMask             = modMask'
+              , keys                = keys'
+              , startupHook         = startupHook'
+              , layoutHook          = layoutHook'
+              , manageHook          = manageHook'
+              , logHook             = logHook' 
+              , normalBorderColor   = normalBorderColor'
+              , focusedBorderColor  = focusedBorderColor' }
+
+main = xmonad $ myUrgencyHook myConfig
 --}}}
 -- vim:foldmethod=marker sw=4 sts=4 ts=4 tw=0 et ai nowrap
