@@ -33,28 +33,24 @@ import Data.Functor
 --}}}
 -- Scratchpads {{{
 scratchpads :: [NamedScratchpad]
-scratchpads = [
-     NS "volume" "xterm -title Volume -xrm \"XTerm*allowTitleOps:false\" -e alsamixer" (title =? "Volume") 
-         (customFloating $ W.RationalRect 0 (1/48) (1/8) (47/48)) ,
-
-     NS "music" "xterm -title Music -xrm \"XTerm*allowTitleOps:false\" -e ncmpc" (title =? "Music")
-         (customFloating $ W.RationalRect (1/10) (2/10) (8/10) (6/10)) ,
-
-     NS "term" "xterm -title Scratchpad -xrm \"XTerm*allowTitleOps:false\"" (title =? "Scratchpad")
-         (customFloating $ W.RationalRect (1/10) (2/10) (8/10) (6/10)) ,
-         
-     NS "dict" "artha" (title =? "Artha ~ The Open Thesaurus")
+scratchpads =
+    [ NS "volume" "xterm -title Volume -xrm \"XTerm*allowTitleOps:false\" -e alsamixer" (title =? "Volume") 
+         (customFloating $ W.RationalRect 0 (1/48) (1/8) (47/48))
+    , NS "music" "xterm -title Music -xrm \"XTerm*allowTitleOps:false\" -e ncmpc" (title =? "Music")
+         (customFloating $ W.RationalRect (1/10) (2/10) (8/10) (6/10))
+    , NS "term" "xterm -title Scratchpad -xrm \"XTerm*allowTitleOps:false\"" (title =? "Scratchpad")
+         (customFloating $ W.RationalRect (1/10) (2/10) (8/10) (6/10))
+    , NS "dict" "artha" (title =? "Artha ~ The Open Thesaurus")
          (customFloating $ W.RationalRect (2/6) (1/6) (2/6) (4/6))] 
 
 myNSManageHook :: NamedScratchpads -> ManageHook
-myNSManageHook s =
-    namedScratchpadManageHook s
+myNSManageHook s = namedScratchpadManageHook s 
     <+> composeOne
-            [ title =? "Music" -?> ask >>= \w -> liftX $ setOpacity w 0.7 >> idHook
-            , title =? "Scratchpad" -?> ask >>= \w -> liftX $ setOpacity w 0.7 >> idHook
-            , title =? "Volume" -?> ask >>= \w -> liftX $ setOpacity w 0.8 >> idHook
-            --, title =? "Artha ~ The Open Thesaurus" -?> ask >>= \w -> liftX $ setOpacity w 0.8 >> idHook
-            ]
+        [ title =? "Music" -?> ask >>= \w -> liftX $ setOpacity w 0.7 >> idHook
+        , title =? "Scratchpad" -?> ask >>= \w -> liftX $ setOpacity w 0.7 >> idHook
+        , title =? "Volume" -?> ask >>= \w -> liftX $ setOpacity w 0.8 >> idHook
+        --, title =? "Artha ~ The Open Thesaurus" -?> ask >>= \w -> liftX $ setOpacity w 0.8 >> idHook
+        ] 
 ---}}}
 -- ManageHook {{{
 doWindowPropsMatchHelper :: Query Bool -> (Query String, [String]) -> Query Bool
@@ -150,8 +146,7 @@ logHook' = do
                                     )
           , ppSort              = fmap (.namedScratchpadFilterOutWorkspace) $ ppSort defaultPP
           , ppTitle             =   (" " ++) . dzenColor "white" colorDarkGrey . dzenEscape
-          , ppOutput            = maybe (\s -> return ()) hPutStrLn mh
-        }
+          , ppOutput            = maybe (\s -> return ()) hPutStrLn mh}
     fadeInactiveLogHook 0xdddddddd
     setWMName "LG3D"
 -- }}}
