@@ -17,6 +17,7 @@ import XMonad.Layout.SimplestFloat
 import XMonad.Layout.IM
 import XMonad.Prompt 
 import XMonad.Prompt.Shell
+import XMonad.Prompt.XMonad
 import XMonad.Util.EZConfig 
 import XMonad.Util.NamedScratchpad
 import XMonad.Util.Run
@@ -29,34 +30,6 @@ import Data.Maybe
 import Data.Ratio ((%))
 import Data.Monoid          (Endo(..)) 
 import Data.Functor
---}}}
--- Config {{{
-myBitmapsDir = "/home/cwills/.xmonad/dzen"
-
-terminal'      = "xterm -e screen"
-modMask' = mod4Mask -- alt and windows key are swapped with xmodmap later
-keys' c = mkKeymap c myKeymap
-workspaces'    = map show [1 .. 15 :: Int] ++ ["NSP"]
-
---myUHook w = withDisplay $ \d -> do
---    sh <- io $ getWMNormalHints d w
---
---    let isFixedSize = sh_min_size sh /= Nothing && sh_min_size sh == sh_max_size sh
---    isTransient <- isJust <$> io (getTransientForHint d w)
---
---    rr <- snd `fmap` floatLocation w
---    -- ensure that float windows don't go over the edge of the screen
---    let adjust (W.RationalRect x y wid h) | x + wid > 1 || y + h > 1 || x < 0 || y < 0
---                                              = W.RationalRect (0.5 - wid/2) (0.5 - h/2) wid h
---        adjust r = r
---
---        f ws | isFixedSize || isTransient = W.float w (adjust rr) . W.insertUp w . W.view i $ ws
---             | otherwise                  = W.insertUp w ws
---            where i = W.tag $ W.workspace $ W.current ws
---    g <- appEndo <$> userCodeDef (Endo id) (runQuery mh w) 
---    windows (g .f)
-
--- myScreenHack = layoutScreens 3 (fixedLayout [(Rectangle 0 0 1360 768),(Rectangle 1360 0 1280 1024),(Rectangle 2640 0 1280 1024)])
 --}}}
 -- Scratchpads {{{
 scratchpads :: [NamedScratchpad]
@@ -71,8 +44,7 @@ scratchpads = [
          (customFloating $ W.RationalRect (1/10) (2/10) (8/10) (6/10)) ,
          
      NS "dict" "artha" (title =? "Artha ~ The Open Thesaurus")
-         (customFloating $ W.RationalRect (2/6) (1/6) (2/6) (4/6)) 
- ] 
+         (customFloating $ W.RationalRect (2/6) (1/6) (2/6) (4/6))] 
 
 myNSManageHook :: NamedScratchpads -> ManageHook
 myNSManageHook s =
@@ -84,7 +56,7 @@ myNSManageHook s =
             --, title =? "Artha ~ The Open Thesaurus" -?> ask >>= \w -> liftX $ setOpacity w 0.8 >> idHook
             ]
 ---}}}
--- manageHook {{{
+-- ManageHook {{{
 doWindowPropsMatchHelper :: Query Bool -> (Query String, [String]) -> Query Bool
 doWindowPropsMatchHelper acc (prop, l) = do
     s <- prop ; a <- acc
@@ -126,7 +98,8 @@ manageHook' = myNSManageHook scratchpads <+> composeOne
 --      myWebs          = [(className, ["Navigator","Shiretoko","Firefox","Uzbl","uzbl","Uzbl-core","uzbl-core","Google-chrome","Chromium","Shredder","Mail"])]
 --      myDevs          = [(className, ["Eclipse","eclipse","Netbeans","Gvim"])]
 --      myWines         = [(className, ["Wine"])]
-
+-- }}}
+-- UrgencyHook {{{
 -- | This is the "ManageHook" that gets run on urgent windows. Any windows no
 -- caught by this manage hook are caught by logHook' and their workspace is
 -- highlighted in the Dzen topbar.
@@ -151,12 +124,12 @@ applyManageHook mh w = do
 -- so consider submitting a patch. 
 myUrgencyHook :: (Window -> X ())
 myUrgencyHook = applyManageHook myUrgencyManageHook 
-
 -- }}}
--- logHook {{{    
+-- LogHook {{{    
 logHook' :: X ()
 logHook' = do 
     mh <- getNamedPipe "dzenPipe" 
+    xmonadDir <- getXMonadDir 
     dynamicLogWithPP $ defaultPP {
             ppCurrent           =   dzenColor colorYellow colorDarkGrey . pad
           , ppVisible           =   dzenColor "white" colorDarkGrey . pad
@@ -167,11 +140,12 @@ logHook' = do
           , ppSep               =   "  |  "
           , ppLayout            =   dzenColor colorYellow colorDarkGrey .
                                     (\x -> case x of
-                                        "ResizableTall"             ->      "^i(" ++ myBitmapsDir ++ "/tall.xbm)"
-                                        "Mirror ResizableTall"      ->      "^i(" ++ myBitmapsDir ++ "/mtall.xbm)"
-                                        "Full"                      ->      "^i(" ++ myBitmapsDir ++ "/full.xbm)"
+                                        "ResizableTall"             ->      "^i(" ++ xmonadDir ++ "/dzen/tall.xbm)"
+                                        "Mirror ResizableTall"      ->      "^i(" ++ xmonadDir ++ "/dzen/mtall.xbm)"
+                                        "Full"                      ->      "^i(" ++ xmonadDir ++ "/dzen/full.xbm)"
                                         "SimplestFloat"             ->      "~"
-                                        "Grid"                      ->      "^i(" ++ myBitmapsDir ++ "/grid.xbm)"
+                                        "Grid"                      ->      "^i(" ++ xmonadDir ++ "/dzen/grid.xbm)"
+                                        "IM Grid"                   ->      "^i(" ++ xmonadDir ++ "/dzen/grid.xbm)"
                                         _                           ->      x
                                     )
           , ppSort              = fmap (.namedScratchpadFilterOutWorkspace) $ ppSort defaultPP
@@ -228,6 +202,7 @@ myKeymap =
     [   ("M-<Return>", spawn $ XMonad.terminal myConfig)
     ,   ("M-p", spawn "xterm")
     ,   ("M-r", shellPrompt mXPConfig)
+    ,   ("M-S-r", xmonadPrompt mXPConfig)
     ,   ("M-S-c", kill)
     ,   ("M-<Space>", sendMessage NextLayout)
     --,   ("M-S-<Space>", setLayout $ XMonad.layoutHook myConfig)
@@ -250,8 +225,8 @@ myKeymap =
     ,   ("M-,", sendMessage (IncMasterN 1))
     ,   ("M-.", sendMessage (IncMasterN (-1)))
     ,   ("M-b", sendMessage ToggleStruts)
-    ,   ("M-S-q", spawn "/home/cwills/.xmonad/cleanup.sh" >> io exitSuccess)
-    ,   ("M-q", spawn "/home/cwills/.xmonad/cleanup.sh; xmonad --recompile; xmonad --restart")
+    ,   ("M-S-q", getXMonadDir >>= \xmonadDir -> spawn (xmonadDir ++ "/cleanup.sh") >> io exitSuccess)
+    ,   ("M-q", getXMonadDir >>= \xmonadDir -> spawn (xmonadDir ++ "/cleanup.sh; xmonad --recompile; xmonad --restart"))
     ,   ("<XF86AudioMute>", spawn "amixer set Master toggle")
     ,   ("<XF86AudioRaiseVolume>", spawn "amixer set Master 5%+ unmute")
     ,   ("<XF86AudioLowerVolume>", spawn "amixer set Master 5%- unmute")
@@ -268,11 +243,11 @@ myKeymap =
     ++
     [ ("M-S-" ++ key, (windows . W.shift) name)
          | (name, key) <-
-             zip workspaces' $ map show [1 .. 9] ++ ["0","<F1>","<F2>","<F3>","<F4>","<F5>","<F6>"]]
+             zip (XMonad.workspaces myConfig) $ map show [1 .. 9] ++ ["0","<F1>","<F2>","<F3>","<F4>","<F5>","<F6>"]]
     ++
     [ ("M-" ++ key, (windows . W.greedyView) name)
          | (name, key) <-
-             zip workspaces' $ map show [1 .. 9] ++ ["0","<F1>","<F2>","<F3>","<F4>","<F5>","<F6>"]]
+             zip (XMonad.workspaces myConfig) $ map show [1 .. 9] ++ ["0","<F1>","<F2>","<F3>","<F4>","<F5>","<F6>"]]
     ++
     [ ("M-" ++ [key], screenWorkspace scr >>= flip whenJust (windows . W.view))
     	| (key, scr)  <- zip "dfg" [0,1,2] -- change to match your screen order and number of screens
@@ -290,15 +265,15 @@ startupHook' = do
     sw <- getDefaultScreenWidth
     let myStatusBar = "dzen2 -x 0 -y '0' -h '16' -w " ++ show (sw - 326) ++ " -ta 'l' -fg '#FFFFFF' -bg '#161616' -fn '-*-bitstream vera sans-medium-r-normal-*-11-*-*-*-*-*-*-*'"
     spawnNamedPipe myStatusBar "dzenPipe"
-    spawn ("/home/cwills/.xmonad/startup.sh " ++ show sw)
+    getXMonadDir >>= \xmonadDir -> spawn (xmonadDir ++ "/startup.sh " ++ show sw)
     setWMName "LG3D"
 -- }}} 
 -- Main {{{
 myConfig = defaultConfig {
-                terminal            = terminal'
-              , workspaces          = workspaces'
-              , modMask             = modMask'
-              , keys                = keys'
+                terminal            = "xterm -e screen"
+              , workspaces          = map show [1 .. 15 :: Int] ++ ["NSP"]
+              , modMask             = mod4Mask -- alt and windows key are swapped with xmodmap in $monadDir/startup.sh
+              , keys                = \c -> mkKeymap c myKeymap
               , startupHook         = startupHook'
               , layoutHook          = layoutHook'
               , manageHook          = manageHook'
