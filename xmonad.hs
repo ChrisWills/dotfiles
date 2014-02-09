@@ -35,14 +35,15 @@ import qualified XMonad.Util.ExtensibleState as XS
 import System.Posix.Signals
 import System.Posix.Types
 import System.Environment
+import System.IO.Error
 --}}}
-
+-- ExtensibleState {{{
 data StartupProgs = StartupProgs { getPids :: [ProcessID] }
     deriving (Show, Typeable)
 
 instance ExtensionClass StartupProgs where
     initialValue = StartupProgs []
-    
+--}}} 
 -- Scratchpads {{{
 scratchpads :: [NamedScratchpad]
 scratchpads =
@@ -234,8 +235,6 @@ myKeymap =
     ,   ("M-b", sendMessage ToggleStruts)
     ,   ("M-S-q",cleanupHook >> spawn "xmonad --recompile; xmonad --restart" >> io exitSuccess)
     ,   ("M-q", cleanupHook >> spawn "xmonad --recompile; xmonad --restart")
-    --,   ("M-S-q", spawn "xmonad --recompile; xmonad --restart" >> io exitSuccess)
-    --,   ("M-q", spawn "xmonad --recompile; xmonad --restart")
     ,   ("<XF86AudioMute>", spawn "amixer set Master toggle")
     ,   ("<XF86AudioRaiseVolume>", spawn "amixer set Master 5%+ unmute")
     ,   ("<XF86AudioLowerVolume>", spawn "amixer set Master 5%- unmute")
@@ -277,7 +276,7 @@ apps hd sw     = ["while true; do date +'%a %b %d %l:%M%p'; sleep 30; done | dze
 
 startCmds hd   = ["xset r rate 200 60"
                  ,"xmodmap "++ hd ++"/.Xmodmap"
-                 ,"feh --bg-fill"++ hd ++"/.wallpaper/current"
+                 ,"feh --bg-fill "++ hd ++"/.wallpaper/current"
                  ,"xbacklight -set 70"]
 
 startupHook' :: X ()
@@ -294,7 +293,7 @@ startupHook' = do
 cleanupHook :: X ()
 cleanupHook = do
     pids <- XS.get  
-    io $ sequence_ $ map (signalProcess sigTERM) (getPids pids)
+    io $ sequence_ $ map (\p -> catchIOError (signalProcess sigTERM p) (\_ -> return ())) (getPids pids)
 -- }}} 
 -- Main {{{
 myConfig = defaultConfig {
