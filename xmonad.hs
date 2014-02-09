@@ -1,3 +1,4 @@
+{-# LANGUAGE DeriveDataTypeable #-}
 -- ~/.xmonad/xmonad.hs
 -- Imports {{{
 import System.Exit
@@ -30,7 +31,18 @@ import Data.Maybe
 import Data.Ratio ((%))
 import Data.Monoid          (Endo(..)) 
 import Data.Functor
+import qualified XMonad.Util.ExtensibleState as XS
+import System.Posix.Signals
+import System.Posix.Types
+import System.Environment
 --}}}
+
+data StartupProgs = StartupProgs { getPids :: [ProcessID] }
+    deriving (Show, Typeable)
+
+instance ExtensionClass StartupProgs where
+    initialValue = StartupProgs []
+    
 -- Scratchpads {{{
 scratchpads :: [NamedScratchpad]
 scratchpads =
@@ -46,15 +58,15 @@ scratchpads =
 myNSManageHook :: NamedScratchpads -> ManageHook
 myNSManageHook s = namedScratchpadManageHook s 
     <+> composeOne
-        [ title =? "Music" -?> ask >>= \w -> liftX $ setOpacity w 0.7 >> idHook
+        [ title =? "Music" -?> ask >>= \w -> liftX $ setOpacity w 0.7 >> idHook 
         , title =? "Scratchpad" -?> ask >>= \w -> liftX $ setOpacity w 0.7 >> idHook
         , title =? "Volume" -?> ask >>= \w -> liftX $ setOpacity w 0.8 >> idHook
         --, title =? "Artha ~ The Open Thesaurus" -?> ask >>= \w -> liftX $ setOpacity w 0.8 >> idHook
-        ] 
+        ]
 ---}}}
 -- ManageHook {{{
-doWindowPropsMatchHelper :: Query Bool -> (Query String, [String]) -> Query Bool
-doWindowPropsMatchHelper acc (prop, l) = do
+doWindowPropsMatchHelper :: (Query String, [String]) -> Query Bool -> Query Bool
+doWindowPropsMatchHelper (prop, l) acc = do
     s <- prop ; a <- acc
     return (a || (s `elem` l))
     
@@ -64,7 +76,7 @@ doWindowPropsMatchHelper acc (prop, l) = do
 -- function susinctly; ignore the name and read the type sig.   
 doWindowPropsMatch :: [(Query String, [String])] -> Query Bool
 doWindowPropsMatch [] = return False
-doWindowPropsMatch xs = foldl doWindowPropsMatchHelper (return False) xs 
+doWindowPropsMatch xs = foldr doWindowPropsMatchHelper (return False) xs 
 
 -- | A trick for fullscreen but stil allow focusing of other workspaces. 
 myDoFullFloat :: ManageHook
@@ -220,8 +232,10 @@ myKeymap =
     ,   ("M-,", sendMessage (IncMasterN 1))
     ,   ("M-.", sendMessage (IncMasterN (-1)))
     ,   ("M-b", sendMessage ToggleStruts)
-    ,   ("M-S-q", getXMonadDir >>= \xmonadDir -> spawn (xmonadDir ++ "/cleanup.sh") >> io exitSuccess)
-    ,   ("M-q", getXMonadDir >>= \xmonadDir -> spawn (xmonadDir ++ "/cleanup.sh; xmonad --recompile; xmonad --restart"))
+    ,   ("M-S-q",cleanupHook >> spawn "xmonad --recompile; xmonad --restart" >> io exitSuccess)
+    ,   ("M-q", cleanupHook >> spawn "xmonad --recompile; xmonad --restart")
+    --,   ("M-S-q", spawn "xmonad --recompile; xmonad --restart" >> io exitSuccess)
+    --,   ("M-q", spawn "xmonad --recompile; xmonad --restart")
     ,   ("<XF86AudioMute>", spawn "amixer set Master toggle")
     ,   ("<XF86AudioRaiseVolume>", spawn "amixer set Master 5%+ unmute")
     ,   ("<XF86AudioLowerVolume>", spawn "amixer set Master 5%- unmute")
@@ -253,20 +267,39 @@ getDefaultScreenWidth :: X CInt
 getDefaultScreenWidth = withDisplay $ \dpy ->
     return $ displayWidth dpy $ defaultScreen dpy
 
+myStatusBar sw = "dzen2 -x 0 -y '0' -h '16' -w " ++ show (sw - 326) ++ " -ta 'l' -fg '#FFFFFF' -bg '#161616' -fn '-*-bitstream vera sans-medium-r-normal-*-11-*-*-*-*-*-*-*'"
+
+apps hd sw     = ["while true; do date +'%a %b %d %l:%M%p'; sleep 30; done | dzen2 -x "++ show (sw - 136) ++" -y '0' -h '16' -w '136' -ta 'c' -fg '#FFFFFF' -bg '#161616' -fn '-*-bitstream vera sans-medium-r-normal-*-11-*-*-*-*-*-*-*'"
+                 ,"/usr/bin/stalonetray --geometry 12x1+"++ show (sw - 326) ++"+0 --max-geometry 12x1+"++ show (sw - 326) ++"+0 --background '#161616' --icon-size 16 --icon-gravity NE --kludges=force_icons_size" 
+                 ,hd ++ "/bin/batt_stat.rb"
+                 ,"nm-applet"
+                 ,"xscreensaver"]
+
+startCmds hd   = ["xset r rate 200 60"
+                 ,"xmodmap "++ hd ++"/.Xmodmap"
+                 ,"feh --bg-fill"++ hd ++"/.wallpaper/current"
+                 ,"xbacklight -set 70"]
+
 startupHook' :: X ()
 startupHook' = do
-    return ()
+    sw <- getDefaultScreenWidth 
+    hd <- io $ getEnv "HOME"
     checkKeymap myConfig myKeymap
-    sw <- getDefaultScreenWidth
-    let myStatusBar = "dzen2 -x 0 -y '0' -h '16' -w " ++ show (sw - 326) ++ " -ta 'l' -fg '#FFFFFF' -bg '#161616' -fn '-*-bitstream vera sans-medium-r-normal-*-11-*-*-*-*-*-*-*'"
-    spawnNamedPipe myStatusBar "dzenPipe"
-    getXMonadDir >>= \xmonadDir -> spawn (xmonadDir ++ "/startup.sh " ++ show sw)
+    spawnNamedPipe (myStatusBar sw) "dzenPipe"
+    xs <- sequence $ map (\s -> io $ spawnPID s) (apps hd sw)
+    XS.put (StartupProgs xs)
+    sequence $ map spawn (startCmds hd)
     setWMName "LG3D"
+
+cleanupHook :: X ()
+cleanupHook = do
+    pids <- XS.get  
+    io $ sequence_ $ map (signalProcess sigTERM) (getPids pids)
 -- }}} 
 -- Main {{{
 myConfig = defaultConfig {
                 terminal            = "xterm -e screen"
-              , workspaces          = map show [1 .. 15 :: Int] ++ ["NSP"]
+              , workspaces          = map show [1 .. 15] ++ ["NSP"]
               , modMask             = mod4Mask -- alt and windows key are swapped with xmodmap in $monadDir/startup.sh
               , keys                = \c -> mkKeymap c myKeymap
               , startupHook         = startupHook'
