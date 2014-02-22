@@ -285,15 +285,15 @@ startupHook' = do
     hd <- io $ getEnv "HOME"
     checkKeymap myConfig myKeymap
     spawnNamedPipe (myStatusBar sw) "dzenPipe"
-    xs <- sequence $ map (\s -> io $ spawnPID s) (apps hd sw)
+    xs <- mapM (\s -> io $ spawnPID s) (apps hd sw)
     XS.put (StartupProgs xs)
-    sequence $ map spawn (startCmds hd)
+    mapM spawn (startCmds hd)
     setWMName "LG3D"
 
 cleanupHook :: X ()
 cleanupHook = do
     pids <- XS.get  
-    io $ sequence_ $ map (\p -> catchIOError (signalProcess sigTERM p) (\_ -> return ())) (getPids pids)
+    io $ mapM_ (\p -> catchIOError (signalProcess sigTERM p) (\_ -> return ())) (getPids pids)
 -- }}} 
 -- Main {{{
 myConfig = defaultConfig {
