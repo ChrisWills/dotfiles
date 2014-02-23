@@ -145,8 +145,8 @@ logHook' = do
           , ppHidden            =   dzenColor "" "" . pad
           , ppUrgent            =   dzenColor colorMedGrey colorYellow
           , ppHiddenNoWindows   =   dzenColor colorMedGrey colorDarkGrey . pad
-          , ppWsSep             =   " "
-          , ppSep               =   "  |  "
+          , ppWsSep             =   ""
+          , ppSep               =   " | "
           , ppLayout            =   dzenColor colorYellow colorDarkGrey .
                                     (\x -> case x of
                                         "ResizableTall"             ->      "^i(" ++ xmonadDir ++ "/dzen/tall.xbm)"
@@ -158,7 +158,7 @@ logHook' = do
                                         _                           ->      x
                                     )
           , ppSort              = fmap (.namedScratchpadFilterOutWorkspace) $ ppSort defaultPP
-          , ppTitle             =   (" " ++) . dzenColor "white" colorDarkGrey . dzenEscape
+          , ppTitle             =   ("" ++) . dzenColor "white" colorDarkGrey . dzenEscape
           , ppOutput            = maybe (\s -> return ()) hPutStrLn mh}
     fadeInactiveLogHook 0xdddddddd
     setWMName "LG3D"
@@ -189,9 +189,10 @@ colorLightGrey       = "#a6a6a6"
 normalBorderColor'    = "#262626"
 focusedBorderColor'   = "#9F6C3B"
 
-barFont  = "terminus"
+barFont  = "Sauce Code Powerline:size=9"
 barXFont = "inconsolata:size=14"
-xftFont = "xft:inconsolata:pixelsize=18"
+--xftFont = "xft:inconsolata:pixelsize=18"
+xftFont = "xft:Sauce Code Powerline:pixelsize=18"
 --}}}
 -- Prompt Config {{{
 mXPConfig :: XPConfig
@@ -266,9 +267,9 @@ getDefaultScreenWidth :: X CInt
 getDefaultScreenWidth = withDisplay $ \dpy ->
     return $ displayWidth dpy $ defaultScreen dpy
 
-myStatusBar sw = "dzen2 -x 0 -y '0' -h '16' -w " ++ show (sw - 326) ++ " -ta 'l' -fg '#FFFFFF' -bg '#161616' -fn '-*-bitstream vera sans-medium-r-normal-*-11-*-*-*-*-*-*-*'"
+myStatusBar sw = "dzen2 -x 0 -y '0' -h '16' -w " ++ show (sw - 326) ++ " -ta 'l' -fg '#FFFFFF' -bg '#161616' -fn " ++ (show barFont) 
 
-apps hd sw     = ["while true; do date +'%a %b %d %l:%M%p'; sleep 30; done | dzen2 -x "++ show (sw - 136) ++" -y '0' -h '16' -w '136' -ta 'c' -fg '#FFFFFF' -bg '#161616' -fn '-*-bitstream vera sans-medium-r-normal-*-11-*-*-*-*-*-*-*'"
+apps hd sw     = ["while true; do date +'%a %b %d %l:%M%p'; sleep 30; done | dzen2 -x "++ show (sw - 136) ++" -y '0' -h '16' -w '136' -ta 'c' -fg '#FFFFFF' -bg '#161616' -fn " ++ (show barFont) 
                  ,"/usr/bin/stalonetray --geometry 12x1+"++ show (sw - 326) ++"+0 --max-geometry 12x1+"++ show (sw - 326) ++"+0 --background '#161616' --icon-size 16 --icon-gravity NE --kludges=force_icons_size" 
                  ,hd ++ "/bin/batt_stat.rb"
                  ,"nm-applet"
