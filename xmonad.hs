@@ -23,13 +23,13 @@ import XMonad.Util.EZConfig
 import XMonad.Util.NamedScratchpad
 import XMonad.Util.Run
 import XMonad.Util.Scratchpad (scratchpadSpawnAction, scratchpadManageHook, scratchpadFilterOutWorkspace)
-import XMonad.Util.SpawnNamedPipe -- This is mine, local build only
+import XMonad.Util.SpawnNamedPipe -- This is in the darcs version of contrib  
 import qualified XMonad.StackSet as W
 import Graphics.X11.Xlib.Display
 import Foreign.C.Types
 import Data.Maybe
 import Data.Ratio ((%))
-import Data.Monoid          (Endo(..)) 
+import Data.Monoid (Endo(..)) 
 import Data.Functor
 import qualified XMonad.Util.ExtensibleState as XS
 import System.Posix.Signals
@@ -100,13 +100,13 @@ manageHook' = myNSManageHook scratchpads <+> composeOne
     --, doWindowPropsMatch myWines      -?> doF(W.shift "6:wine")
     ] 
     where
-        myIgnores       = [(resource,  ["desktop","desktop_window","notify-osd","stalonetray","trayer"])]
-        myCenterFloats  = [(className, ["VirtualBox","Xmessage","Save As...","XFontSel","Downloads","Nm-connection-editor","qemu","artha"])
+        myIgnores       = [(resource,   ["desktop","desktop_window","notify-osd","stalonetray","trayer"])]
+        myCenterFloats  = [(className,  ["VirtualBox","Xmessage","Save As...","XFontSel","Downloads","Nm-connection-editor","qemu","artha"])
                           ,(title,      ["Google Chrome Options","Chromium Options"])]
-        myFloats        = [(className, ["Gimp","ij-ImageJ"])]
---      myWebs          = [(className, ["Navigator","Shiretoko","Firefox","Uzbl","uzbl","Uzbl-core","uzbl-core","Google-chrome","Chromium","Shredder","Mail"])]
---      myDevs          = [(className, ["Eclipse","eclipse","Netbeans","Gvim"])]
---      myWines         = [(className, ["Wine"])]
+        myFloats        = [(className,  ["Gimp","ij-ImageJ"])]
+--      myWebs          = [(className,  ["Navigator","Shiretoko","Firefox","Uzbl","uzbl","Uzbl-core","uzbl-core","Google-chrome","Chromium","Shredder","Mail"])]
+--      myDevs          = [(className,  ["Eclipse","eclipse","Netbeans","Gvim"])]
+--      myWines         = [(className,  ["Wine"])]
 -- }}}
 -- UrgencyHook {{{
 -- | This is the "ManageHook" that gets run on urgent windows. Any windows no
@@ -139,8 +139,8 @@ logHook' :: X ()
 logHook' = do 
     mh <- getNamedPipe "dzenPipe" 
     xmonadDir <- getXMonadDir 
-    dynamicLogWithPP $ defaultPP {
-            ppCurrent           =   dzenColor colorYellow colorDarkGrey . pad
+    dynamicLogWithPP $ defaultPP
+          { ppCurrent           =   dzenColor colorYellow colorDarkGrey . pad
           , ppVisible           =   dzenColor "white" colorDarkGrey . pad
           , ppHidden            =   dzenColor "" "" . pad
           , ppUrgent            =   dzenColor colorMedGrey colorYellow
@@ -174,30 +174,28 @@ layoutHook' = avoidStruts $
 --}}}
 -- Theme {{{
 -- Color names are easier to remember:
-colorOrange          = "#ff7701"
-colorDarkGrey        = "#161616"
-colorMedGrey         = "#444444"
-colorPink            = "#e3008d"
-colorGreen           = "#00aa4a"
-colorBlue            = "#008dd5"
-colorYellow          = "#ebac54"
-colorWhite           = "#cfbfad"
-colorLightBlue       = "#afdfff"
-colorDarkGrey2       = "#262626"
-colorLightGrey       = "#a6a6a6"
-
+colorOrange           = "#ff7701"
+colorDarkGrey         = "#161616"
+colorMedGrey          = "#444444"
+colorPink             = "#e3008d"
+colorGreen            = "#00aa4a"
+colorBlue             = "#008dd5"
+colorYellow           = "#ebac54"
+colorWhite            = "#cfbfad"
+colorLightBlue        = "#afdfff"
+colorDarkGrey2        = "#262626"
+colorLightGrey        = "#a6a6a6"
 normalBorderColor'    = "#262626"
 focusedBorderColor'   = "#9F6C3B"
 
 barFont  = "Sauce Code Powerline:size=9"
 barXFont = "inconsolata:size=14"
---xftFont = "xft:inconsolata:pixelsize=18"
-xftFont = "xft:Sauce Code Powerline:pixelsize=18"
+xftFont  = "xft:Sauce Code Powerline:pixelsize=18"
 --}}}
 -- Prompt Config {{{
 mXPConfig :: XPConfig
-mXPConfig = defaultXPConfig { 
-                  font                  = xftFont
+mXPConfig = defaultXPConfig
+                { font                  = xftFont
                 , bgColor               = colorDarkGrey
                 , fgColor               = colorLightGrey
                 , bgHLight              = colorLightGrey
@@ -297,8 +295,8 @@ cleanupHook = do
     io $ mapM_ (\p -> catchIOError (signalProcess sigTERM p) (\_ -> return ())) (getPids pids)
 -- }}} 
 -- Main {{{
-myConfig = defaultConfig {
-                terminal            = "xterm -e screen"
+myConfig = defaultConfig
+              { terminal            = "xterm -e screen"
               , workspaces          = map show [1 .. 15] ++ ["NSP"]
               , modMask             = mod4Mask -- alt and windows key are swapped with xmodmap in $monadDir/startup.sh
               , keys                = \c -> mkKeymap c myKeymap
