@@ -36,6 +36,8 @@ import System.Posix.Signals
 import System.Posix.Types
 import System.Environment
 import System.IO.Error
+import qualified Data.Map as M 
+import XMonad.Actions.FloatKeys
 --}}}
 -- ExtensibleState {{{
 data StartupProgs = StartupProgs { getPids :: [ProcessID] }
@@ -205,6 +207,9 @@ mXPConfig = defaultXPConfig
                 , historyFilter         = deleteConsecutive }
 -- }}}
 -- Key Map {{{
+
+isFloatDo f1 f2 w s = if (M.member w (W.floating s)) then f1 w else f2 w
+
 myKeymap = 
     [   ("M-<Return>", spawn $ XMonad.terminal myConfig)
     ,   ("M-p", spawn "xterm")
@@ -221,10 +226,14 @@ myKeymap =
     ,   ("M-S-<Return>", windows W.swapMaster)
     ,   ("M-S-j", windows W.swapDown)
     ,   ("M-S-k", windows W.swapUp)
-    ,   ("M-h", sendMessage Shrink)
-    ,   ("M-l", sendMessage Expand)
-    ,   ("M-S-h", sendMessage MirrorShrink)
-    ,   ("M-S-l", sendMessage MirrorExpand)
+    --,   ("M-h", sendMessage Shrink)
+    ,   ("M-h", withFocused $ withWindowSet . isFloatDo (keysResizeWindow (-10,0) (0,0)) (\_ -> sendMessage Shrink))
+    --,   ("M-l", sendMessage Expand)
+    ,   ("M-l", withFocused $ withWindowSet . isFloatDo (keysResizeWindow (10,0) (0,0)) (\_ -> sendMessage Expand))
+    --,   ("M-S-h", sendMessage MirrorShrink)
+    ,   ("M-S-h", withFocused $ withWindowSet . isFloatDo (keysResizeWindow (0,-10) (0,0)) (\_ -> sendMessage MirrorShrink))
+    --,   ("M-S-l", sendMessage MirrorExpand)
+    ,   ("M-S-l", withFocused $ withWindowSet . isFloatDo (keysResizeWindow (0,10) (0,0)) (\_ -> sendMessage MirrorExpand)) -- Doesn't work for some reason
     ,   ("M-t", withFocused $ windows . W.sink)
     ,   ("M-S-t", sinkAll)
     ,   ("M-<Backspace>", focusUrgent)
