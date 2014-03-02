@@ -348,7 +348,7 @@ myConfig =
     defaultConfig
         { terminal            = "xterm -e screen"
         , workspaces          = map show [1 .. 15] ++ ["NSP"]
-        , modMask             = mod4Mask -- alt and windows key are swapped with xmodmap in $monadDir/startup.sh
+        , modMask             = mod4Mask -- alt and windows key are swapped with xmodmap in startup hook
         , keys                = \c -> mkKeymap c myKeymap
         , startupHook         = startupHook'
         , layoutHook          = layoutHook'
