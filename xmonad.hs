@@ -321,21 +321,22 @@ startupApps homeDir screenWidth =
      ,"xscreensaver"]
 
 -- | These run once on startup and exit immediately so we don't care about their pids
-startupCmds homeDir =
+startupCmds xmonadDir homeDir =
     ["xset r rate 200 60"
     ,"xmodmap "++ homeDir ++"/.Xmodmap"
-    ,"feh --bg-fill "++ homeDir ++"/.wallpaper/current"
+    ,"feh --bg-fill " ++ xmonadDir ++ "/wallpapers/current"
     ,"xbacklight -set 70"]
 
 startupHook' :: X ()
 startupHook' = do
     screenWidth <- getDefaultScreenWidth 
     homeDir <- io $ getEnv "HOME"
+    xmonadDir <- getXMonadDir 
     checkKeymap myConfig myKeymap
     spawnNamedPipe (myStatusBar screenWidth) "dzenPipe"
     appPids <- mapM (\app -> io $ spawnPID app) (startupApps homeDir screenWidth)
     XS.put (StartupProgs appPids)
-    mapM spawn (startupCmds homeDir)
+    mapM spawn (startupCmds xmonadDir homeDir)
     setWMName "LG3D"
 
 cleanupHook :: X ()
