@@ -23,7 +23,6 @@ import XMonad.Util.EZConfig
 import XMonad.Util.NamedScratchpad
 import XMonad.Util.Run
 import XMonad.Util.Scratchpad (scratchpadSpawnAction, scratchpadManageHook, scratchpadFilterOutWorkspace)
-import XMonad.Util.SpawnNamedPipe -- This is in the darcs version of contrib  
 import qualified XMonad.StackSet as W
 import Graphics.X11.Xlib.Display
 import Foreign.C.Types
@@ -37,8 +36,38 @@ import System.Posix.Types
 import System.Environment
 import System.IO.Error
 import qualified Data.Map as M 
+import qualified Data.Map.Strict as Map
+import Control.Monad
 import XMonad.Actions.FloatKeys
+-- import XMonad.Util.SpawnNamedPipe -- This is in the darcs version of contrib  
 --}}}
+-- SpawnNamedPipe {{{
+-- | This has been accepted as a patch to xmonad-contrib tip but adding it here
+-- so that I'm not tied to running tip
+data NamedPipes = NamedPipes { pipeMap :: Map.Map String Handle }
+    deriving (Show, Typeable)
+
+instance ExtensionClass NamedPipes where
+    initialValue = NamedPipes Map.empty 
+
+-- | When 'spawnNamedPipe' is executed with a command "String" and a name
+-- "String" respectively.  The command string is spawned with 'spawnPipe' (as
+-- long as the name chosen hasn't been used already) and the "Handle" returned
+-- is saved in Xmonad's state associated with the name "String". 
+spawnNamedPipe :: String -> String -> X ()
+spawnNamedPipe cmd name = do
+  b <- XS.gets (Map.member name . pipeMap) 
+  unless b $ do
+    h <- spawnPipe cmd 
+    XS.modify (NamedPipes . Map.insert name h . pipeMap)   
+
+-- | Attempts to retrieve a "Handle" to a pipe previously stored in Xmonad's
+-- state associated with the given string via a call to 'spawnNamedPipe'. If the
+-- given string doesn't exist in the map stored in Xmonad's state Nothing is
+-- returned.   
+getNamedPipe :: String -> X (Maybe Handle)
+getNamedPipe name = XS.gets (Map.lookup name . pipeMap)
+-- }}}
 -- ExtensibleState {{{
 data StartupProgs = StartupProgs { getPids :: [ProcessID] }
     deriving (Show, Typeable)
@@ -137,31 +166,33 @@ myUrgencyHook :: (Window -> X ())
 myUrgencyHook = applyManageHook myUrgencyManageHook 
 -- }}}
 -- LogHook {{{    
+chooseLayoutIcon :: String -> String -> String
+chooseLayoutIcon xmonadDir layoutName =
+    case layoutName of
+    "ResizableTall"        -> "^i(" ++ xmonadDir ++ "/dzen/tall.xbm)"
+    "Mirror ResizableTall" -> "^i(" ++ xmonadDir ++ "/dzen/mtall.xbm)"
+    "Full"                 -> "^i(" ++ xmonadDir ++ "/dzen/full.xbm)"
+    "SimplestFloat"        -> "~"
+    "Grid"                 -> "^i(" ++ xmonadDir ++ "/dzen/grid.xbm)"
+    "IM Grid"              -> "^i(" ++ xmonadDir ++ "/dzen/grid.xbm)"
+    _                      -> layoutName 
+
 logHook' :: X ()
 logHook' = do 
-    mh <- getNamedPipe "dzenPipe" 
+    dzenHandle <- getNamedPipe "dzenPipe" 
     xmonadDir <- getXMonadDir 
     dynamicLogWithPP $ defaultPP
-          { ppCurrent           =   dzenColor colorYellow colorDarkGrey . pad
-          , ppVisible           =   dzenColor "white" colorDarkGrey . pad
-          , ppHidden            =   dzenColor "" "" . pad
-          , ppUrgent            =   dzenColor colorMedGrey colorYellow
-          , ppHiddenNoWindows   =   dzenColor colorMedGrey colorDarkGrey . pad
-          , ppWsSep             =   ""
-          , ppSep               =   " | "
-          , ppLayout            =   dzenColor colorYellow colorDarkGrey .
-                                    (\x -> case x of
-                                        "ResizableTall"             ->      "^i(" ++ xmonadDir ++ "/dzen/tall.xbm)"
-                                        "Mirror ResizableTall"      ->      "^i(" ++ xmonadDir ++ "/dzen/mtall.xbm)"
-                                        "Full"                      ->      "^i(" ++ xmonadDir ++ "/dzen/full.xbm)"
-                                        "SimplestFloat"             ->      "~"
-                                        "Grid"                      ->      "^i(" ++ xmonadDir ++ "/dzen/grid.xbm)"
-                                        "IM Grid"                   ->      "^i(" ++ xmonadDir ++ "/dzen/grid.xbm)"
-                                        _                           ->      x
-                                    )
+          { ppCurrent           = dzenColor colorYellow colorDarkGrey . pad
+          , ppVisible           = dzenColor colorWhite colorDarkGrey . pad
+          , ppHidden            = dzenColor colorInvisible colorInvisible . pad
+          , ppUrgent            = dzenColor colorMedGrey colorYellow
+          , ppHiddenNoWindows   = dzenColor colorMedGrey colorDarkGrey . pad
+          , ppWsSep             = ""
+          , ppSep               = " | "
+          , ppLayout            = dzenColor colorYellow colorDarkGrey . (chooseLayoutIcon xmonadDir) 
           , ppSort              = fmap (.namedScratchpadFilterOutWorkspace) $ ppSort defaultPP
-          , ppTitle             =   ("" ++) . dzenColor "white" colorDarkGrey . dzenEscape
-          , ppOutput            = maybe (\s -> return ()) hPutStrLn mh}
+          , ppTitle             = ("" ++) . dzenColor colorWhite colorDarkGrey . dzenEscape
+          , ppOutput            = maybe (\s -> return ()) hPutStrLn dzenHandle}
     fadeInactiveLogHook 0xdddddddd
     setWMName "LG3D"
 -- }}}
@@ -176,6 +207,7 @@ layoutHook' = avoidStruts $
 --}}}
 -- Theme {{{
 -- Color names are easier to remember:
+colorInvisible        = ""
 colorOrange           = "#ff7701"
 colorDarkGrey         = "#161616"
 colorMedGrey          = "#444444"
@@ -183,7 +215,8 @@ colorPink             = "#e3008d"
 colorGreen            = "#00aa4a"
 colorBlue             = "#008dd5"
 colorYellow           = "#ebac54"
-colorWhite            = "#cfbfad"
+--colorWhite            = "#cfbfad"
+colorWhite            = "#ffffff"
 colorLightBlue        = "#afdfff"
 colorDarkGrey2        = "#262626"
 colorLightGrey        = "#a6a6a6"
@@ -196,15 +229,16 @@ xftFont  = "xft:Sauce Code Powerline:pixelsize=18"
 --}}}
 -- Prompt Config {{{
 mXPConfig :: XPConfig
-mXPConfig = defaultXPConfig
-                { font                  = xftFont
-                , bgColor               = colorDarkGrey
-                , fgColor               = colorLightGrey
-                , bgHLight              = colorLightGrey
-                , fgHLight              = colorDarkGrey
-                , promptBorderWidth     = 0
-                , height                = 20
-                , historyFilter         = deleteConsecutive }
+mXPConfig =
+    defaultXPConfig
+        { font                  = xftFont
+        , bgColor               = colorDarkGrey
+        , fgColor               = colorLightGrey
+        , bgHLight              = colorLightGrey
+        , fgHLight              = colorDarkGrey
+        , promptBorderWidth     = 0
+        , height                = 20
+        , historyFilter         = deleteConsecutive }
 -- }}}
 -- Key Map {{{
 
@@ -274,28 +308,34 @@ getDefaultScreenWidth :: X CInt
 getDefaultScreenWidth = withDisplay $ \dpy ->
     return $ displayWidth dpy $ defaultScreen dpy
 
-myStatusBar sw = "dzen2 -x 0 -y '0' -h '16' -w " ++ show (sw - 326) ++ " -ta 'l' -fg '#FFFFFF' -bg '#161616' -fn " ++ (show barFont) 
+-- | Run this as a namedPipe so that we can update it with loghook
+myStatusBar screenWidth =
+    "dzen2 -x 0 -y '0' -h '16' -w " ++ show (screenWidth - 326) ++ " -ta 'l' -fg '#FFFFFF' -bg '#161616' -fn " ++ (show barFont) 
 
-apps hd sw     = ["while true; do date +'%a %b %d %l:%M%p'; sleep 30; done | dzen2 -x "++ show (sw - 136) ++" -y '0' -h '16' -w '136' -ta 'c' -fg '#FFFFFF' -bg '#161616' -fn " ++ (show barFont) 
-                 ,"/usr/bin/stalonetray --geometry 12x1+"++ show (sw - 326) ++"+0 --max-geometry 12x1+"++ show (sw - 326) ++"+0 --background '#161616' --icon-size 16 --icon-gravity NE --kludges=force_icons_size" 
-                 ,hd ++ "/bin/batt_stat.rb"
-                 ,"nm-applet"
-                 ,"xscreensaver"]
+-- | These stay running during an xmonad session. We save the pids so we can kill these on shutdown/restart 
+startupApps homeDir screenWidth =
+     ["while true; do date +'%a %b %d %l:%M%p'; sleep 30; done | dzen2 -x "++ show (screenWidth - 136) ++" -y '0' -h '16' -w '136' -ta 'c' -fg '#FFFFFF' -bg '#161616' -fn " ++ (show barFont) 
+     ,"/usr/bin/stalonetray --geometry 12x1+"++ show (screenWidth - 326) ++"+0 --max-geometry 12x1+"++ show (screenWidth - 326) ++"+0 --background '#161616' --icon-size 16 --icon-gravity NE --kludges=force_icons_size" 
+     ,homeDir ++ "/bin/batt_stat.rb"
+     ,"nm-applet"
+     ,"xscreensaver"]
 
-startCmds hd   = ["xset r rate 200 60"
-                 ,"xmodmap "++ hd ++"/.Xmodmap"
-                 ,"feh --bg-fill "++ hd ++"/.wallpaper/current"
-                 ,"xbacklight -set 70"]
+-- | These run once on startup and exit immediately so we don't care about their pids
+startupCmds homeDir =
+    ["xset r rate 200 60"
+    ,"xmodmap "++ homeDir ++"/.Xmodmap"
+    ,"feh --bg-fill "++ homeDir ++"/.wallpaper/current"
+    ,"xbacklight -set 70"]
 
 startupHook' :: X ()
 startupHook' = do
-    sw <- getDefaultScreenWidth 
-    hd <- io $ getEnv "HOME"
+    screenWidth <- getDefaultScreenWidth 
+    homeDir <- io $ getEnv "HOME"
     checkKeymap myConfig myKeymap
-    spawnNamedPipe (myStatusBar sw) "dzenPipe"
-    xs <- mapM (\s -> io $ spawnPID s) (apps hd sw)
-    XS.put (StartupProgs xs)
-    mapM spawn (startCmds hd)
+    spawnNamedPipe (myStatusBar screenWidth) "dzenPipe"
+    appPids <- mapM (\app -> io $ spawnPID app) (startupApps homeDir screenWidth)
+    XS.put (StartupProgs appPids)
+    mapM spawn (startupCmds homeDir)
     setWMName "LG3D"
 
 cleanupHook :: X ()
@@ -304,17 +344,18 @@ cleanupHook = do
     io $ mapM_ (\p -> catchIOError (signalProcess sigTERM p) (\_ -> return ())) (getPids pids)
 -- }}} 
 -- Main {{{
-myConfig = defaultConfig
-              { terminal            = "xterm -e screen"
-              , workspaces          = map show [1 .. 15] ++ ["NSP"]
-              , modMask             = mod4Mask -- alt and windows key are swapped with xmodmap in $monadDir/startup.sh
-              , keys                = \c -> mkKeymap c myKeymap
-              , startupHook         = startupHook'
-              , layoutHook          = layoutHook'
-              , manageHook          = manageHook'
-              , logHook             = logHook' 
-              , normalBorderColor   = normalBorderColor'
-              , focusedBorderColor  = focusedBorderColor' }
+myConfig =
+    defaultConfig
+        { terminal            = "xterm -e screen"
+        , workspaces          = map show [1 .. 15] ++ ["NSP"]
+        , modMask             = mod4Mask -- alt and windows key are swapped with xmodmap in $monadDir/startup.sh
+        , keys                = \c -> mkKeymap c myKeymap
+        , startupHook         = startupHook'
+        , layoutHook          = layoutHook'
+        , manageHook          = manageHook'
+        , logHook             = logHook' 
+        , normalBorderColor   = normalBorderColor'
+        , focusedBorderColor  = focusedBorderColor' }
 
 main = xmonad $ withUrgencyHook myUrgencyHook myConfig
 --}}}
