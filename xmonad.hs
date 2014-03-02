@@ -33,7 +33,6 @@ import Data.Functor
 import qualified XMonad.Util.ExtensibleState as XS
 import System.Posix.Signals
 import System.Posix.Types
-import System.Environment
 import System.IO.Error
 import qualified Data.Map as M 
 import qualified Data.Map.Strict as Map
@@ -313,10 +312,10 @@ myStatusBar screenWidth =
     "dzen2 -x 0 -y '0' -h '16' -w " ++ show (screenWidth - 326) ++ " -ta 'l' -fg '#FFFFFF' -bg '#161616' -fn " ++ (show barFont) 
 
 -- | These stay running during an xmonad session. We save the pids so we can kill these on shutdown/restart 
-startupApps homeDir screenWidth =
+startupApps screenWidth =
      ["while true; do date +'%a %b %d %l:%M%p'; sleep 30; done | dzen2 -x "++ show (screenWidth - 136) ++" -y '0' -h '16' -w '136' -ta 'c' -fg '#FFFFFF' -bg '#161616' -fn " ++ (show barFont) 
      ,"/usr/bin/stalonetray --geometry 12x1+"++ show (screenWidth - 326) ++"+0 --max-geometry 12x1+"++ show (screenWidth - 326) ++"+0 --background '#161616' --icon-size 16 --icon-gravity NE --kludges=force_icons_size" 
-     ,homeDir ++ "/bin/batt_stat.rb"
+     ,"batt_stat.rb"
      ,"nm-applet"
      ,"xscreensaver"]
 
@@ -330,11 +329,10 @@ startupCmds xmonadDir =
 startupHook' :: X ()
 startupHook' = do
     screenWidth <- getDefaultScreenWidth 
-    homeDir <- io $ getEnv "HOME"
     xmonadDir <- getXMonadDir 
     checkKeymap myConfig myKeymap
     spawnNamedPipe (myStatusBar screenWidth) "dzenPipe"
-    appPids <- mapM (\app -> io $ spawnPID app) (startupApps homeDir screenWidth)
+    appPids <- mapM (\app -> io $ spawnPID app) (startupApps screenWidth)
     XS.put (StartupProgs appPids)
     mapM spawn (startupCmds xmonadDir)
     setWMName "LG3D"
