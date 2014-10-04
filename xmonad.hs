@@ -66,6 +66,7 @@ spawnNamedPipe cmd name = do
 -- returned.   
 getNamedPipe :: String -> X (Maybe Handle)
 getNamedPipe name = XS.gets (Map.lookup name . pipeMap)
+
 -- }}}
 -- ExtensibleState {{{
 data StartupProgs = StartupProgs { getPids :: [ProcessID] }
@@ -73,6 +74,23 @@ data StartupProgs = StartupProgs { getPids :: [ProcessID] }
 
 instance ExtensionClass StartupProgs where
     initialValue = StartupProgs []
+
+-- Proof of concept for xmonad mailing list
+--data MasterPaneFlag = MasterPaneFlag { getFlag :: Bool }
+--    deriving (Show, Typeable)
+--
+--instance ExtensionClass MasterPaneFlag where
+--    initialValue = MasterPaneFlag False 
+--
+--pickIncrFun :: Bool -> X () 
+--pickIncrFun flag = if flag then (sendMessage (IncMasterN (1))) else (sendMessage (IncMasterN 0))
+--
+--toggleMasterPane :: X ()
+--toggleMasterPane  = do
+--    flag <- XS.get 
+--    XS.modify(MasterPaneFlag . not . getFlag)
+--    asks config >>= \c -> setLayout (XMonad.layoutHook c) >> pickIncrFun (getFlag flag)
+     
 --}}} 
 -- Scratchpads {{{
 scratchpads :: [NamedScratchpad]
@@ -139,7 +157,7 @@ manageHook' = myNSManageHook scratchpads <+> composeOne
 --      myWines         = [(className,  ["Wine"])]
 -- }}}
 -- UrgencyHook {{{
--- | This is the "ManageHook" that gets run on urgent windows. Any windows no
+-- | This is the "ManageHook" that gets run on urgent windows. Any windows not
 -- caught by this manage hook are caught by logHook' and their workspace is
 -- highlighted in the Dzen topbar.
 myUrgencyManageHook :: ManageHook
@@ -203,6 +221,7 @@ layoutHook' = avoidStruts $
     ||| smartBorders simplestFloat
     ||| withIM (1%7) (Role "buddy_list") (smartBorders Grid) -- It would be cool to be able to pass a ManageHook in directly here...patch? 
         where tiled   = ResizableTall 1 (2/100) (1/2) []
+
 --}}}
 -- Theme {{{
 -- Color names are easier to remember:
@@ -250,7 +269,7 @@ myKeymap =
     ,   ("M-S-r", xmonadPrompt mXPConfig)
     ,   ("M-S-c", kill)
     ,   ("M-<Space>", sendMessage NextLayout)
-    --,   ("M-S-<Space>", setLayout $ XMonad.layoutHook myConfig)
+    ,   ("M-S-<Space>", asks config >>= \c -> setLayout (XMonad.layoutHook c))
     ,   ("M-n", refresh)
     ,   ("M-<Tab>", windows W.focusDown)
     ,   ("M-j", windows W.focusDown)
@@ -259,13 +278,9 @@ myKeymap =
     ,   ("M-S-<Return>", windows W.swapMaster)
     ,   ("M-S-j", windows W.swapDown)
     ,   ("M-S-k", windows W.swapUp)
-    --,   ("M-h", sendMessage Shrink)
     ,   ("M-h", withFocused $ withWindowSet . isFloatDo (keysResizeWindow (-10,0) (0,0)) (\_ -> sendMessage Shrink))
-    --,   ("M-l", sendMessage Expand)
     ,   ("M-l", withFocused $ withWindowSet . isFloatDo (keysResizeWindow (10,0) (0,0)) (\_ -> sendMessage Expand))
-    --,   ("M-S-h", sendMessage MirrorShrink)
     ,   ("M-S-h", withFocused $ withWindowSet . isFloatDo (keysResizeWindow (0,-10) (0,0)) (\_ -> sendMessage MirrorShrink))
-    --,   ("M-S-l", sendMessage MirrorExpand)
     ,   ("M-S-l", withFocused $ withWindowSet . isFloatDo (keysResizeWindow (0,10) (0,0)) (\_ -> sendMessage MirrorExpand)) -- Doesn't work for some reason
     ,   ("M-t", withFocused $ windows . W.sink)
     ,   ("M-S-t", sinkAll)
@@ -273,6 +288,7 @@ myKeymap =
     ,   ("M-S-<Backspace>",clearUrgents)
     ,   ("M-,", sendMessage (IncMasterN 1))
     ,   ("M-.", sendMessage (IncMasterN (-1)))
+    --,   ("M-v", toggleMasterPane)
     ,   ("M-b", sendMessage ToggleStruts)
     ,   ("M-S-q",cleanupHook >> spawn "xmonad --recompile; xmonad --restart" >> io exitSuccess)
     ,   ("M-q", cleanupHook >> spawn "xmonad --recompile; xmonad --restart")
@@ -298,8 +314,8 @@ myKeymap =
          | (name, key) <-
              zip (XMonad.workspaces myConfig) $ map show [1 .. 9] ++ ["0","<F1>","<F2>","<F3>","<F4>","<F5>","<F6>"]]
     ++
-    [ ("M-" ++ [key], screenWorkspace scr >>= flip whenJust (windows . W.view))
-    	| (key, scr)  <- zip "dfg" [0,1,2] -- change to match your screen order and number of screens
+    [ ("M-M1-" ++ [key], screenWorkspace scr >>= flip whenJust (windows . W.view))
+    	| (key, scr)  <- zip "1234" [0,1,2,4] -- change to match your screen order and number of screens
     ]
 --}}}
 -- StartupHook {{{
@@ -315,14 +331,14 @@ myStatusBar screenWidth =
 startupApps screenWidth =
      ["while true; do date +'%a %b %d %l:%M%p'; sleep 30; done | dzen2 -x "++ show (screenWidth - 136) ++" -y '0' -h '16' -w '136' -ta 'c' -fg '#FFFFFF' -bg '#161616' -fn " ++ (show barFont) 
      ,"/usr/bin/stalonetray --geometry 12x1+"++ show (screenWidth - 326) ++"+0 --max-geometry 12x1+"++ show (screenWidth - 326) ++"+0 --background '#161616' --icon-size 16 --icon-gravity NE --kludges=force_icons_size" 
-     ,"batt_stat.rb"
+     ,"batt_stat.exe"
      ,"nm-applet"
      ,"xscreensaver"]
 
 -- | These run once on startup and exit immediately so we don't care about their pids
 startupCmds xmonadDir =
     ["xset r rate 200 60"
-    ,"xmodmap "++ xmonadDir ++"/Xmodmap"
+    ,"xmodmap " ++ xmonadDir ++ "/.Xmodmap"
     ,"feh --bg-fill " ++ xmonadDir ++ "/wallpapers/current"
     ,"xbacklight -set 70"]
 
