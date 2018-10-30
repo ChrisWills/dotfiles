@@ -17,10 +17,10 @@ import XMonad.Layout.NoBorders (smartBorders, noBorders)
 import XMonad.Layout.ResizableTile
 import XMonad.Layout.SimplestFloat
 import XMonad.Layout.IM
-import XMonad.Prompt 
+import XMonad.Prompt
 import XMonad.Prompt.Shell
 import XMonad.Prompt.XMonad
-import XMonad.Util.EZConfig 
+import XMonad.Util.EZConfig
 import XMonad.Util.NamedScratchpad
 import XMonad.Util.Run
 import XMonad.Util.Scratchpad (scratchpadSpawnAction, scratchpadManageHook, scratchpadFilterOutWorkspace)
@@ -29,13 +29,13 @@ import Graphics.X11.Xlib.Display
 import Foreign.C.Types
 import Data.Maybe
 import Data.Ratio ((%))
-import Data.Monoid (Endo(..)) 
+import Data.Monoid (Endo(..))
 import Data.Functor
 import qualified XMonad.Util.ExtensibleState as XS
 import System.Posix.Signals
 import System.Posix.Types
 import System.IO.Error
-import qualified Data.Map as M 
+import qualified Data.Map as M
 import qualified Data.Map.Strict as Map
 import Control.Monad
 import XMonad.Actions.FloatKeys
@@ -358,12 +358,12 @@ startupHook' = do
     xmonadDir <- getXMonadDir
     checkKeymap myConfig myKeymap
     spawnNamedPipe (myStatusBar screenWidth) "dzenPipe"
+    mapM spawn (startupCmds xmonadDir)
     appPids <- mapM (\app -> io $ spawnPID app) (startupApps screenWidth)
     XS.put (StartupProgs appPids)
-    mapM spawn (startupCmds xmonadDir)
     setWMName "LG3D"
     spawnOn "1" "google-chrome"
-    spawnOn "2" "xterm -e 'tmux -2'"
+    spawnOn "2" "xterm -e '/home/cwills/.xmonad/tmux-dev.sh'" 
 
 cleanupHook :: X ()
 cleanupHook = do
@@ -379,8 +379,9 @@ myConfig =
         , keys                = \c -> mkKeymap c myKeymap
         , startupHook         = startupHook'
         , layoutHook          = layoutHook'
-        , manageHook          = manageSpawn <+> manageHook' -- manageSpawn is needed for spawnOn to work
-        , logHook             = logHook' 
+        , handleEventHook     = docksEventHook
+        , manageHook          = (manageSpawn <+> manageHook') <+> manageDocks -- manageSpawn is needed for spawnOn to work
+        , logHook             = logHook'
         , normalBorderColor   = normalBorderColor'
         , focusedBorderColor  = focusedBorderColor' }
 

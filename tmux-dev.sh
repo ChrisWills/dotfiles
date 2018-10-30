@@ -12,4 +12,4 @@ tmux splitw -v
 
 tmux select-window -t $session:0
 
-tmux attach-session -t $session
+tmux -2 attach-session -t $session
