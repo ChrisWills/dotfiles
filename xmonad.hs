@@ -4,6 +4,7 @@
 import System.Exit
 import System.IO
 import XMonad
+import XMonad.Actions.SpawnOn
 import XMonad.Actions.WithAll (sinkAll)
 import XMonad.Hooks.DynamicLog
 import XMonad.Hooks.FadeInactive
@@ -214,10 +215,10 @@ logHook' = do
     setWMName "LG3D"
 -- }}}
 -- Layout {{{
-layoutHook' = avoidStruts $ 
-    smartBorders tiled
+layoutHook' = avoidStruts $
+    noBorders Full
+    ||| smartBorders tiled
     ||| smartBorders (Mirror tiled)
-    ||| noBorders Full
     ||| smartBorders simplestFloat
     ||| withIM (1%7) (Role "buddy_list") (smartBorders Grid) -- It would be cool to be able to pass a ManageHook in directly here...patch? 
         where tiled   = ResizableTall 1 (2/100) (1/2) []
@@ -319,6 +320,12 @@ myKeymap =
     ]
 --}}}
 -- StartupHook {{{
+
+spawnToWorkspace :: String -> String -> X ()
+spawnToWorkspace program workspace = do
+    spawn program
+    windows $ W.greedyView workspace
+
 getDefaultScreenWidth :: X CInt 
 getDefaultScreenWidth = withDisplay $ \dpy ->
     return $ displayWidth dpy $ defaultScreen dpy
@@ -338,36 +345,41 @@ startupApps screenWidth =
 -- | These run once on startup and exit immediately so we don't care about their pids
 startupCmds xmonadDir =
     ["xset r rate 200 60"
+    ,"xrdb -load .Xdefaults"
     ,"xmodmap " ++ xmonadDir ++ "/.Xmodmap"
     ,"feh --bg-fill " ++ xmonadDir ++ "/wallpapers/current"
-    ,"xbacklight -set 70"]
+    ,"xbacklight -set 70"
+    ,"nm-applet"
+    ,"xfce4-power-manager"]
 
 startupHook' :: X ()
 startupHook' = do
-    screenWidth <- getDefaultScreenWidth 
-    xmonadDir <- getXMonadDir 
+    screenWidth <- getDefaultScreenWidth
+    xmonadDir <- getXMonadDir
     checkKeymap myConfig myKeymap
     spawnNamedPipe (myStatusBar screenWidth) "dzenPipe"
     appPids <- mapM (\app -> io $ spawnPID app) (startupApps screenWidth)
     XS.put (StartupProgs appPids)
     mapM spawn (startupCmds xmonadDir)
     setWMName "LG3D"
+    spawnOn "1" "google-chrome"
+    spawnOn "2" "xterm -e 'tmux -2'"
 
 cleanupHook :: X ()
 cleanupHook = do
-    pids <- XS.get  
+    pids <- XS.get
     io $ mapM_ (\p -> catchIOError (signalProcess sigTERM p) (\_ -> return ())) (getPids pids)
 -- }}} 
 -- Main {{{
 myConfig =
     defaultConfig
-        { terminal            = "xterm -e screen"
+        { terminal            = "xterm -e 'tmux -2'"
         , workspaces          = map show [1 .. 15] ++ ["NSP"]
         , modMask             = mod4Mask -- alt and windows key are swapped with xmodmap in startup hook
         , keys                = \c -> mkKeymap c myKeymap
         , startupHook         = startupHook'
         , layoutHook          = layoutHook'
-        , manageHook          = manageHook'
+        , manageHook          = manageSpawn <+> manageHook' -- manageSpawn is needed for spawnOn to work
         , logHook             = logHook' 
         , normalBorderColor   = normalBorderColor'
         , focusedBorderColor  = focusedBorderColor' }
