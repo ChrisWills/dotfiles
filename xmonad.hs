@@ -364,6 +364,7 @@ startupHook' = do
     setWMName "LG3D"
     spawnOn "1" "google-chrome"
     spawnOn "2" "xterm -e '/home/cwills/.xmonad/tmux-dev.sh'" 
+    -- spawnOn "12" "pidgin"
 
 cleanupHook :: X ()
 cleanupHook = do
