@@ -347,7 +347,8 @@ startupCmds xmonadDir =
     ["xset r rate 200 60"
     ,"xrdb -load .Xdefaults"
     ,"xmodmap " ++ xmonadDir ++ "/.Xmodmap"
-    ,"feh --bg-fill " ++ xmonadDir ++ "/wallpapers/current"
+    ,"convert -size 1600x900 xc:black " ++ xmonadDir ++ "/.wallpaper.png"
+    ,"feh --bg-fill " ++ xmonadDir ++ "/.wallpaper.png"
     ,"xbacklight -set 70"
     ,"nm-applet"
     ,"xfce4-power-manager"]
