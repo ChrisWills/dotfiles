@@ -1,0 +1,6 @@
+(:name helm-descbinds 
+       :website "https://github.com/emacs-helm/helm-descbinds"
+       :description "currently active key bindings interactively searchable with helm"
+       :type github
+       :pkgname "emacs-helm/helm-descbinds"
+       :features helm-descbinds)

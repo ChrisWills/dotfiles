@@ -1,0 +1,6 @@
+(:name cwills-jbeans-theme 
+       :website "https://github.com/ChrisWills/cwills-jbeans-theme"
+       :description "A hacked up version of jbeans for emacs"
+       :type github
+       :pkgname "ChrisWills/cwills-jbeans-theme"
+       :features jbeans-theme)

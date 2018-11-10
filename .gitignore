@@ -3,3 +3,4 @@ emacs/.emacs.d/el-get
 emacs/.emacs.d/elpa
 emacs/.emacs.d/recentf
 emacs/.emacs.d/*.elc
+*~
