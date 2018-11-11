@@ -2,6 +2,9 @@
 
 (setq evil-want-keybinding nil)
 
+;; Get TAB functionality back in evil-org
+(setq evil-want-C-i-jump nil)
+
 ;; Automatically move cursor to help windows
 (setq help-window-select t)
 
@@ -23,6 +26,7 @@
 (el-get 'sync
 	'(ace-window
 	  evil
+	  evil-leader
 	  evil-surround
 	  evil-collection
 	  use-package
@@ -34,6 +38,9 @@
 	  cwills-jbeans-theme
 	  help-fns+
 	  helm-descbinds
+	  org-mode
+	  org-bullets
+	  evil-org-mode
 	  which-key))
 
 
@@ -194,4 +201,51 @@ setting the args to `-t TYPE' instead of prompting."
 
 (add-hook 'emacs-lisp-mode-hook #'smartparens-mode)
 (add-hook 'emacs-lisp-mode-hook #'highlight-parentheses-mode)
+
+
+(use-package org
+  :defer t
+  :general
+  (:keymaps '(org-mode-map org-agenda-mode-map)
+   :states  '(normal motion emacs)
+   :prefix cw/normal-prefix
+   :non-normal-prefix cw/non-normal-prefix
+   "a o"   '(:ignore t :which-key "Org")
+   "a o c" #'org-capture 
+   "a o a" #'org-agenda)
+  :config
+  (progn
+    (use-package evil-org
+      :config
+      (add-hook 'org-mode-hook 'evil-org-mode)
+      (add-hook 'evil-org-mode-hook
+		(lambda ()
+		  (evil-org-set-key-theme)))
+      (require 'evil-org-agenda)
+      (evil-org-agenda-set-keys)))
+  (progn
+    (use-package org-bullets
+      :config
+      (add-hook 'org-mode-hook (lambda () (org-bullets-mode 1)))
+      (setcdr org-bullets-bullet-map nil)))
+  (setq org-todo-keywords
+	'((sequence "NEXT(n!)" "WAIT(w@\|)" "DPND(x@)" "DFER(r@)" "|" "DONE(d!)" "CNCL(c@)")))
+  (setq org-todo-keyword-faces
+	'(("NEXT" . (:weight bold :foreground "Pink"))
+	  ("WAIT" . (:weight bold :foreground "Pink"))
+	  ("DONE" . (:foreground "PaleGreen" :weight bold))))
+  (setq org-capture-templates
+	'(("n" "Next Action" entry
+	   (file "~/org/capture.org") "* NEXT %?\n  captured: %U"
+	   :empty-lines 1)
+	  ("N" "Next Action with Gmail Id" entry
+	   (file "~/org/capture.org") "* NEXT %?\n  captured: %U\n  [[gmail:%^{gmail id}][%\\1]]"
+	   :empty-lines 1)
+	  ("c" "Conversation memo" entry
+	   (file "~/org/conversations.org") "* %U\n %?"
+	   :empty-lines 1)))
+  (setq org-link-abbrev-alist
+	'(("gmail" . "https://mail.google.com/mail/u/0/#all/%s")
+	  ("jira" . "https://jira.delacy.com:8443/browse/%s")))
+  (setq org-agenda-files '("~/org/")))
 
