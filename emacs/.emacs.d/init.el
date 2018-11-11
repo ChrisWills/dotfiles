@@ -1,6 +1,14 @@
 (package-initialize)
 
 (setq evil-want-keybinding nil)
+
+;; Automatically move cursor to help windows
+(setq help-window-select t)
+
+(if (fboundp 'menu-bar-mode)   (menu-bar-mode   -1))
+(if (fboundp 'tool-bar-mode)   (tool-bar-mode   -1))
+(if (fboundp 'scroll-bar-mode) (scroll-bar-mode -1))
+
 (add-to-list 'load-path "~/.emacs.d/el-get/el-get")
 
 (unless (require 'el-get nil 'noerror)
@@ -18,6 +26,8 @@
 	  evil-surround
 	  evil-collection
 	  use-package
+	  ivy-rich
+	  swiper
 	  helm
 	  general
 	  cwills-jbeans-theme
@@ -25,9 +35,6 @@
 	  helm-descbinds
 	  which-key))
 
-(if (fboundp 'menu-bar-mode)   (menu-bar-mode   -1))
-(if (fboundp 'tool-bar-mode)   (tool-bar-mode   -1))
-(if (fboundp 'scroll-bar-mode) (scroll-bar-mode -1))
 
 (require 'general)
 (require 'help-fns+)
@@ -59,14 +66,24 @@
  :prefix cw/normal-prefix
  :non-normal-prefix cw/non-normal-prefix
  "SPC"   '(helm-M-x :which-key "M-X")
+ ;; Files
+ "f"     '(:ignore t :which-key "files")
  "f f"   #'helm-find-files
- "w"     #'evil-window-map  
- "b b"   #'helm-mini
+ "f j"   #'dired-jump
+ ;; Buffers
+ "b"   '(:ignore t :which-key "buffers")
  "TAB"   #'evil-switch-to-windows-last-buffer
+ "b b"   #'helm-mini
+ "b d"   #'kill-this-buffer
+ "b r"   #'revert-buffer
+ ;; Windows
+ "w"     #'evil-window-map  
  "w TAB" #'evil-window-next
  "w -"	 #'evil-window-split
  "w /"	 #'evil-window-vsplit
- "w m"	 #'delete-other-windows)
+ "w m"	 #'delete-other-windows
+ "w d"   #'delete-window
+ )
 
 (general-define-key
  :keymaps '(helm-map)
@@ -77,9 +94,8 @@
 ;; Make <escape> quit as much as possible 
 ;; Stolen from spacemacs/layers/+spacemacs/spacemacs-defaults/keybindings.el
 (general-define-key
- :keymaps '(minibuffer-local-map minibuffer-local-ns-map minibuffer-local-completion-map minibuffer-local-must-match-map minibuffer-local-isearch-map)
+ :keymaps '(minibuffer-local-map minibuffer-local-ns-map minibuffer-local-completion-map minibuffer-local-must-match-map minibuffer-local-isearch-map ivy-minibuffer-map)
  "<escape>" #'keyboard-escape-quit)
-
 
 
 
