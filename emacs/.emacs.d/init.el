@@ -26,8 +26,10 @@
 	  evil-surround
 	  evil-collection
 	  use-package
-	  ivy-rich
+	  ;;ivy-rich
 	  swiper
+	  smartparens
+	  rainbow-delimiters
 	  helm
 	  general
 	  cwills-jbeans-theme
@@ -54,6 +56,65 @@
 
 (defconst cw/normal-prefix "SPC")
 (defconst cw/non-normal-prefix "M-SPC")
+
+(defun cw/counsel-rg-with-prefix-arg (&rest args)
+  (let ((current-prefix-arg '(4)))
+    (apply #'counsel-rg args)))
+
+(defun cw/counsel-rg-prompt-dir (&rest args)
+  "A wrapper around `counsel-rg' that always prompts for a directory,
+but if a prefix arg has already been specified, just passes that
+through to the underlying function"
+  (interactive)
+  (if current-prefix-arg
+      (call-interactively #'counsel-rg)
+    (cw/counsel-rg-with-prefix-arg "" nil "" nil)))
+
+(defun cw/counsel-rg-cwd (&rest args)
+  "A wrapper around `counsel-rg' that always prompts for a directory,
+but if a prefix arg has already been specified, just passes that
+through to the underlying function"
+  (interactive)
+  (if current-prefix-arg
+      (call-interactively #'counsel-rg)
+    (cw/counsel-rg-with-prefix-arg "" default-directory "" nil)))
+
+
+(defun cw/counsel-rg-with-type (&optional types prompt)
+  "Prompt for a supported file type from rg and then run
+`counsel-rg' as if a prefix arg was passed, but explicitly
+setting the args to `-t TYPE' instead of prompting."
+  (interactive)
+  (let* ((file-types
+          (or types
+              (thread-last (ivy-read "File type: " (cw/counsel-rg-type-list) :require-match t)
+                (s-split ":")
+                (nth 0)
+                (list))))
+         (extra-rg-args
+          (s-join " " (seq-map (lambda (type) (format "-t%s" type)) file-types))))
+    (cw/counsel-rg-with-prefix-arg nil nil extra-rg-args prompt)))
+
+(defun cw/counsel-rg-with-type-ocaml ()
+  (interactive)
+  (cw/counsel-rg-with-type '("ocaml") "rg (ocaml)"))
+
+(defun cw/counsel-rg-with-type-c ()
+  (interactive)
+  (cw/counsel-rg-with-type '("c") "rg (c)"))
+
+(defun cw/counsel-rg-with-type-ocaml-or-c ()
+  (interactive)
+  (cw/counsel-rg-with-type '("ocaml" "c") "rg (ocaml or c)"))
+
+(defun cw/counsel-rg-with-type-elisp ()
+  (interactive)
+  (cw/counsel-rg-with-type '("elisp") "rg (elisp)"))
+
+(defun cw/counsel-rg-with-type-lisp ()
+  (interactive)
+  (cw/counsel-rg-with-type '("lisp") "rg (lisp)"))
+
 
 (general-define-key
  :keymaps '(motion)
@@ -83,6 +144,15 @@
  "w /"	 #'evil-window-vsplit
  "w m"	 #'delete-other-windows
  "w d"   #'delete-window
+ "a"     '(:ignore t :which-key "Applications")
+ "a g"   '(:ignore t :which-key "Grep")
+ "a g r" #'cw/counsel-rg-prompt-dir
+ "a g R" #'cw/counsel-rg-with-type
+ "a g O" #'cw/counsel-rg-with-type-ocaml
+ "a g C" #'cw/counsel-rg-with-type-c
+ "a g J" #'cw/counsel-rg-with-type-ocaml-or-c
+ "a g E" #'cw/counsel-rg-with-type-elisp
+ "a g L" #'cw/counsel-rg-with-type-lisp
  )
 
 (general-define-key
@@ -97,25 +167,25 @@
  :keymaps '(minibuffer-local-map minibuffer-local-ns-map minibuffer-local-completion-map minibuffer-local-must-match-map minibuffer-local-isearch-map ivy-minibuffer-map)
  "<escape>" #'keyboard-escape-quit)
 
+(general-define-key
+ :keymaps '(ivy-minibuffer-map)
+ [remap ivy-next-history-element] 'ignore
+ [remap ivy-previous-history-element] 'ignore
+ [remap ivy-yank-word] 'ignore
+ "<up>"   #'ivy-previous-line
+ "<down>" #'ivy-next-line
+ "M-k"    #'ivy-previous-line
+ "M-j"    #'ivy-next-line
+ )
 
+(setq ivy-height 15)
+(setq ivy-initial-inputs-alist nil)
+(setq ivy-format-function 'ivy-format-function-arrow)
+(setq ivy-count-format "%d/%d ")
 
-;; "a"   '(:ignore t :which-key "applications")
-;; "b"   '(:ignore t :which-key "buffers")
-;; "w"   '(:ignore t :which-key "windows")
-;; "f"   '(:ignore t :which-key "files")
-;; "h"   #'help
-;; "f f" #'cp/find-file
-;; "f r" #'find-file-read-only
-;; "f j" #'dired-jump
-;; "b b" #'switch-to-buffer
-;; "b k" #'kill-buffer
-;; "b K" #'kill-buffer-and-window
-;; "b r" #'revert-buffer
-;; "b R" #'cp/revert-buffer-all
-;; "b f" #'(lambda () (interactive) (message (buffer-file-name)))
-;; "w s" #'split-window-vertically
-;; "w v" #'split-window-horizontally
-;; "w K" #'kill-buffer-and-window
-;; "w o" #'delete-other-windows
-;; "w x" #'delete-window
-;; "w =" #'balance-windows)
+(require 'smartparens-config)
+(add-hook 'emacs-lisp-mode-hook #'smartparens-mode)
+
+;(require 'rainbow-delimiters)
+;(add-hook 'emacs-lisp-mode-hook #'rainbow-delimiters-mode)
+
