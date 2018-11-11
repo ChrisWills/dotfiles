@@ -1,0 +1,14 @@
+* Features to add
+** quick funtion for editing dot-file - steal from spacemacs
+** add gtags 
+   be careful since some keybinding in the spacemacs setup broke org mode
+** Look into autoformatting tools for elisp
+** add work stuff in a non-ip exposing way
+** fancy mode line (maybe)
+   Might just need a couple additions since I'm starting to like the basic mode line
+** consider git/hg integration mode
+** ocaml stuff for home
+   
+* Bugs
+** counsel/ivy buffers get resized weirdly when an extra long line is in the output
+   Consider trying to get counsel-rg to work with helm so we can drop ivy or make ivy nicer
