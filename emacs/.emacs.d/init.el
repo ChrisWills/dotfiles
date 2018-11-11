@@ -26,10 +26,9 @@
 	  evil-surround
 	  evil-collection
 	  use-package
-	  ;;ivy-rich
+	  highlight-parentheses
 	  swiper
 	  smartparens
-	  rainbow-delimiters
 	  helm
 	  general
 	  cwills-jbeans-theme
@@ -183,9 +182,16 @@ setting the args to `-t TYPE' instead of prompting."
 (setq ivy-format-function 'ivy-format-function-arrow)
 (setq ivy-count-format "%d/%d ")
 
+(require 'highlight-parentheses)
 (require 'smartparens-config)
-(add-hook 'emacs-lisp-mode-hook #'smartparens-mode)
 
-;(require 'rainbow-delimiters)
-;(add-hook 'emacs-lisp-mode-hook #'rainbow-delimiters-mode)
+(setq hl-paren-delay 0.2)
+(setq hl-paren-colors '("Springgreen3"  
+                        "IndianRed1" 
+                        "IndianRed3" 
+                        "IndianRed4"))                                                                                                                 
+(set-face-attribute 'hl-paren-face nil :weight 'ultra-bold) 
+
+(add-hook 'emacs-lisp-mode-hook #'smartparens-mode)
+(add-hook 'emacs-lisp-mode-hook #'highlight-parentheses-mode)
 
