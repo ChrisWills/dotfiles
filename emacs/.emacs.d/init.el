@@ -218,6 +218,9 @@ setting the args to `-t TYPE' instead of prompting."
    "a o"   '(:ignore t :which-key "Org")
    "a o c" #'org-capture 
    "a o a" #'org-agenda)
+  (:keymaps '(org-mode-map)
+   :states  '(normal motion emacs)
+   "C-c t" #'org-todo)
   :config
   (progn
     (use-package evil-org
