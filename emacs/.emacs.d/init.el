@@ -1,10 +1,8 @@
 (package-initialize)
 
 (setq evil-want-keybinding nil)
-
 ;; Get TAB functionality back in evil-org
 (setq evil-want-C-i-jump nil)
-
 ;; Automatically move cursor to help windows
 (setq help-window-select t)
 
@@ -37,28 +35,27 @@
 	  general
 	  cwills-jbeans-theme
 	  help-fns+
-	  helm-descbinds
 	  org-mode
 	  org-bullets
 	  evil-org-mode
 	  which-key))
 
+(load-theme 'jbeans t)
 
 (require 'general)
 (require 'help-fns+)
-(require 'helm-descbinds)
-(require 'which-key)
 
-(evil-mode 1)
+(use-package which-key
+  :config
+  (which-key-mode))
 
-(use-package evil-collection
-    :after (evil)
-    :config
-    (evil-collection-init))
-(helm-descbinds-mode)
-(which-key-mode)
-
-(load-theme 'jbeans t)
+(use-package evil
+  :config
+  (progn
+    (use-package evil-collection
+      :config
+      (evil-collection-init)))
+  (evil-mode 1))
 
 (defconst cw/normal-prefix "SPC")
 (defconst cw/non-normal-prefix "M-SPC")
@@ -170,7 +167,12 @@ setting the args to `-t TYPE' instead of prompting."
 ;; Make <escape> quit as much as possible 
 ;; Stolen from spacemacs/layers/+spacemacs/spacemacs-defaults/keybindings.el
 (general-define-key
- :keymaps '(minibuffer-local-map minibuffer-local-ns-map minibuffer-local-completion-map minibuffer-local-must-match-map minibuffer-local-isearch-map ivy-minibuffer-map)
+ :keymaps '(minibuffer-local-map
+	    minibuffer-local-ns-map
+	    minibuffer-local-completion-map
+	    minibuffer-local-must-match-map
+	    minibuffer-local-isearch-map
+	    ivy-minibuffer-map)
  "<escape>" #'keyboard-escape-quit)
 
 (general-define-key
@@ -181,27 +183,23 @@ setting the args to `-t TYPE' instead of prompting."
  "<up>"   #'ivy-previous-line
  "<down>" #'ivy-next-line
  "M-k"    #'ivy-previous-line
- "M-j"    #'ivy-next-line
- )
+ "M-j"    #'ivy-next-line)
 
 (setq ivy-height 15)
 (setq ivy-initial-inputs-alist nil)
 (setq ivy-format-function 'ivy-format-function-arrow)
 (setq ivy-count-format "%d/%d ")
 
-(require 'highlight-parentheses)
-(require 'smartparens-config)
-
-(setq hl-paren-delay 0.2)
-(setq hl-paren-colors '("Springgreen3"  
-                        "IndianRed1" 
-                        "IndianRed3" 
-                        "IndianRed4"))                                                                                                                 
-(set-face-attribute 'hl-paren-face nil :weight 'ultra-bold) 
-
-(add-hook 'emacs-lisp-mode-hook #'smartparens-mode)
-(add-hook 'emacs-lisp-mode-hook #'highlight-parentheses-mode)
-
+(use-package highlight-parentheses
+  :config
+  (setq hl-paren-delay 0.2)
+  (setq hl-paren-colors '("Springgreen3"  
+			  "IndianRed1" 
+			  "IndianRed3" 
+			  "IndianRed4"))                                                                                                                 
+  (set-face-attribute 'hl-paren-face nil :weight 'ultra-bold) 
+  (add-hook 'emacs-lisp-mode-hook #'smartparens-mode)
+  (add-hook 'emacs-lisp-mode-hook #'highlight-parentheses-mode))
 
 (use-package org
   :defer t
