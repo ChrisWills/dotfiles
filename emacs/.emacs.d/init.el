@@ -10,12 +10,19 @@
 (if (fboundp 'tool-bar-mode)   (tool-bar-mode   -1))
 (if (fboundp 'scroll-bar-mode) (scroll-bar-mode -1))
 
+(global-hl-line-mode 1)                       ; highlight current line
+(setq-default indent-tabs-mode nil)           ; use spaces instead of tabs
+(setq-default tab-width 2)                    ; 2-space tabs
+(setq-default fill-column 80)                 ; 80 character line width
+(electric-indent-mode 1)                      ; smart auto-indent
+(setq-default electric-indent-inhibit t)      ;  ... disable indenting previous line (WHY?!)
+
 (add-to-list 'load-path "~/.emacs.d/el-get/el-get")
 
 (unless (require 'el-get nil 'noerror)
   (with-current-buffer
-      (url-retrieve-synchronously
-       "https://raw.githubusercontent.com/dimitri/el-get/master/el-get-install.el")
+    (url-retrieve-synchronously
+      "https://raw.githubusercontent.com/dimitri/el-get/master/el-get-install.el")
     (goto-char (point-max))
     (eval-print-last-sexp)))
 
@@ -32,6 +39,7 @@
 	  swiper
 	  smartparens
 	  helm
+    helm-gtags
 	  general
 	  cwills-jbeans-theme
 	  help-fns+
@@ -167,13 +175,12 @@ setting the args to `-t TYPE' instead of prompting."
 ;; Make <escape> quit as much as possible 
 ;; Stolen from spacemacs/layers/+spacemacs/spacemacs-defaults/keybindings.el
 (general-define-key
- :keymaps '(minibuffer-local-map
-	    minibuffer-local-ns-map
-	    minibuffer-local-completion-map
-	    minibuffer-local-must-match-map
-	    minibuffer-local-isearch-map
-	    ivy-minibuffer-map)
+ :keymaps '(minibuffer-local-map minibuffer-local-ns-map minibuffer-local-completion-map minibuffer-local-must-match-map minibuffer-local-isearch-map ivy-minibuffer-map)
  "<escape>" #'keyboard-escape-quit)
+
+(general-define-key
+ :keymaps '(help-map)
+ "<escape>" #'help-quit)
 
 (general-define-key
  :keymaps '(ivy-minibuffer-map)
@@ -246,4 +253,30 @@ setting the args to `-t TYPE' instead of prompting."
 	'(("gmail" . "https://mail.google.com/mail/u/0/#all/%s")
 	  ("jira" . "https://jira.delacy.com:8443/browse/%s")))
   (setq org-agenda-files '("~/org/")))
+
+
+(use-package helm-gtags
+  :after helm
+  :init
+  (add-hook 'dired-mode-hook 'helm-gtags-mode)
+  (add-hook 'eshell-mode-hook 'helm-gtags-mode)
+  (add-hook 'c-mode-hook 'helm-gtags-mode)
+  (add-hook 'c++-mode-hook 'helm-gtags-mode)
+  (add-hook 'asm-mode-hook 'helm-gtags-mode)
+  (setq
+   helm-gtags-ignore-case t
+   helm-gtags-auto-update t
+   helm-gtags-use-input-at-cursor t
+   helm-gtags-pulse-at-cursor t
+   helm-gtags-suggested-key-mapping t)
+  :general
+  (:keymaps '(helm-gtags-mode-map)
+   :states  '(normal motion emacs)
+   "C-c g c" #'helm-gtags-create-tags
+   "C-c g a" #'helm-gtags-tags-in-this-function
+   "C-c g ." #'helm-gtags-select
+   "M-."     #'helm-gtags-dwim
+   "M-,"     #'helm-gtags-pop-stack
+   "C-c <"   #'helm-gtags-previous-history
+   "C-c >"   #'helm-gtags-next-history))
 
