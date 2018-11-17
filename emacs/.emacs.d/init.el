@@ -4,6 +4,11 @@
   (when (file-exists-p work-init)
     (load-file work-init)))
 
+;; Stop ivy minibuffers from leaving a weird blank space after a multi-line result
+;; This turned out to be more annoying than the original behavior...
+;;(setq resize-mini-windows t)
+
+;; This fixes some weird behavoir that I cannot recall...
 (setq evil-want-keybinding nil)
 ;; Get TAB functionality back in evil-org
 (setq evil-want-C-i-jump nil)
@@ -44,6 +49,7 @@
 	  use-package
 	  highlight-parentheses
 	  swiper
+    ivy-rich
 	  smartparens
 	  helm
     helm-gtags
@@ -54,15 +60,20 @@
 	  org-bullets
 	  evil-org-mode
 	  which-key
-    shackle))
+    shackle
+    s))
 
 (load-theme 'jbeans t)
 
 (add-to-list 'load-path "~/.emacs.d/elisp")
 
+(require 'ivy-rich)
+(ivy-rich-mode)
 (require 'general)
 (require 'help-fns+)
+(require 's)
 
+;; Starting to question how helpful this actually is...
 (require 'smartparens-config)
 (eval-after-load 'emacs-lisp-mode
   '((require 'smartparens)
@@ -97,6 +108,10 @@
 
 (defconst cw/normal-prefix "SPC")
 (defconst cw/non-normal-prefix "M-SPC")
+
+(defun cw/counsel-rg-type-list ()
+  (thread-last (shell-command-to-string "rg --type-list")
+    (s-split "\n")))
 
 (defun cw/counsel-rg-with-prefix-arg (&rest args)
   (let ((current-prefix-arg '(4)))
@@ -161,19 +176,26 @@ setting the args to `-t TYPE' instead of prompting."
   ","   nil)
 
 (general-define-key
+ :keymaps '(visual)
+  "M->" '(eval-region :which-key "eval-region"))
+
+(general-define-key
  :keymaps '(override)
  :states '(normal motion insert emacs)
  :prefix cw/normal-prefix
  :non-normal-prefix cw/non-normal-prefix
  "SPC"   '(helm-M-x :which-key "M-X")
+ ;;"SPC"   '(counsel-M-x :which-key "M-X")
  ;; Files
  "f"     '(:ignore t :which-key "files")
  "f f"   #'helm-find-files
+ ;;"f f"   #'counsel-find-file
  "f j"   #'dired-jump
  ;; Buffers
  "b"   '(:ignore t :which-key "buffers")
- "TAB"   #'evil-switch-to-windows-last-buffer
+ "TAB"   '(evil-switch-to-windows-last-buffer :which-key "switch-to-last-buffer")
  "b b"   #'helm-mini
+ ;;"b b"   #'ivy-switch-buffer
  "b d"   #'kill-this-buffer
  "b r"   #'revert-buffer
  ;; Windows
@@ -185,13 +207,13 @@ setting the args to `-t TYPE' instead of prompting."
  "w d"   #'delete-window
  "a"     '(:ignore t :which-key "Applications")
  "a g"   '(:ignore t :which-key "Grep")
- "a g r" #'cw/counsel-rg-prompt-dir
- "a g R" #'cw/counsel-rg-with-type
- "a g O" #'cw/counsel-rg-with-type-ocaml
- "a g C" #'cw/counsel-rg-with-type-c
- "a g J" #'cw/counsel-rg-with-type-ocaml-or-c
- "a g E" #'cw/counsel-rg-with-type-elisp
- "a g L" #'cw/counsel-rg-with-type-lisp
+ "a g r" '(cw/counsel-rg-prompt-dir :which-key "counsel-rg-prompt-dir")
+ "a g R" '(cw/counsel-rg-with-type :which-key "counsel-rg-prompt-type")
+ "a g O" '(cw/counsel-rg-with-type-ocaml :which-key "counsel-rg-ocaml")
+ "a g C" '(cw/counsel-rg-with-type-c :which-key "counsel-rg-c")
+ "a g J" '(cw/counsel-rg-with-type-ocaml-or-c :which-key "counsel-rg-ocaml/c")
+ "a g E" '(cw/counsel-rg-with-type-elisp :which-key "counsel-rg-elisp")
+ "a g L" '(cw/counsel-rg-with-type-lisp :which-key "counsel-rg-lisp")
  )
 
 (general-define-key
@@ -284,7 +306,7 @@ setting the args to `-t TYPE' instead of prompting."
 	  ("jira" . "https://jira.delacy.com:8443/browse/%s")))
   (setq org-agenda-files '("~/org/")))
 
-
+;; Requires "global" to be installed on the OS
 (use-package helm-gtags
   :after helm
   :init
