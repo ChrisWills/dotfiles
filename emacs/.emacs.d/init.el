@@ -54,18 +54,26 @@
 	  org-bullets
 	  evil-org-mode
 	  which-key
-          shackle))
+    shackle))
+
+(load-theme 'jbeans t)
+
+(add-to-list 'load-path "~/.emacs.d/elisp")
+
+(require 'general)
+(require 'help-fns+)
+
+(require 'smartparens-config)
+(eval-after-load 'emacs-lisp-mode
+  '((require 'smartparens)
+    (sp-local-pair 'emacs-lisp-mode "'" nil :actions :rem)))
+(add-hook 'emacs-lisp-mode-hook #'smartparens-mode)
 
 (use-package shackle
   :init
   (setq shackle-rules '(("\\`\\*helm.*?\\*\\'" :regexp t :align t :size 0.3)))
   :config
   (shackle-mode))
-
-(load-theme 'jbeans t)
-
-(require 'general)
-(require 'help-fns+)
 
 (use-package which-key
   :config
@@ -77,6 +85,14 @@
     (use-package evil-collection
       :config
       (evil-collection-init)))
+  (progn
+    (use-package evil-surround
+      :general
+      (:keymaps '(evil-surround-mode-map)
+       :states '(visual)
+       "S" nil 
+       "s" #'evil-surround-region)))
+      :config 
   (evil-mode 1))
 
 (defconst cw/normal-prefix "SPC")
@@ -103,7 +119,6 @@ through to the underlying function"
   (if current-prefix-arg
       (call-interactively #'counsel-rg)
     (cw/counsel-rg-with-prefix-arg "" default-directory "" nil)))
-
 
 (defun cw/counsel-rg-with-type (&optional types prompt)
   "Prompt for a supported file type from rg and then run
@@ -139,7 +154,6 @@ setting the args to `-t TYPE' instead of prompting."
 (defun cw/counsel-rg-with-type-lisp ()
   (interactive)
   (cw/counsel-rg-with-type '("lisp") "rg (lisp)"))
-
 
 (general-define-key
  :keymaps '(motion)
@@ -219,8 +233,6 @@ setting the args to `-t TYPE' instead of prompting."
 			  "IndianRed3" 
 			  "IndianRed4"))                                                                                                                 
   (set-face-attribute 'hl-paren-face nil :weight 'ultra-bold) 
-  ;; CR cwills: disable smartparens for single-quotes in elisp mode
-  ;;(add-hook 'emacs-lisp-mode-hook #'smartparens-mode)
   (add-hook 'emacs-lisp-mode-hook #'highlight-parentheses-mode))
 
 (use-package org
