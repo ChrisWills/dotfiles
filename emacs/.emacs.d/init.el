@@ -1,5 +1,9 @@
 (package-initialize)
 
+(let ((work-init "~/.emacs.d/work-init.el"))
+  (when (file-exists-p work-init)
+    (load-file work-init)))
+
 (setq evil-want-keybinding nil)
 ;; Get TAB functionality back in evil-org
 (setq evil-want-C-i-jump nil)
@@ -16,6 +20,9 @@
 (setq-default fill-column 80)                 ; 80 character line width
 (electric-indent-mode 1)                      ; smart auto-indent
 (setq-default electric-indent-inhibit t)      ;  ... disable indenting previous line (WHY?!)
+(setq make-backup-files nil)
+(setq auto-save-default nil)
+(setq create-lockfiles nil)
 
 (add-to-list 'load-path "~/.emacs.d/el-get/el-get")
 
@@ -46,7 +53,14 @@
 	  org-mode
 	  org-bullets
 	  evil-org-mode
-	  which-key))
+	  which-key
+          shackle))
+
+(use-package shackle
+  :init
+  (setq shackle-rules '(("\\`\\*helm.*?\\*\\'" :regexp t :align t :size 0.3)))
+  :config
+  (shackle-mode))
 
 (load-theme 'jbeans t)
 
@@ -205,7 +219,8 @@ setting the args to `-t TYPE' instead of prompting."
 			  "IndianRed3" 
 			  "IndianRed4"))                                                                                                                 
   (set-face-attribute 'hl-paren-face nil :weight 'ultra-bold) 
-  (add-hook 'emacs-lisp-mode-hook #'smartparens-mode)
+  ;; CR cwills: disable smartparens for single-quotes in elisp mode
+  ;;(add-hook 'emacs-lisp-mode-hook #'smartparens-mode)
   (add-hook 'emacs-lisp-mode-hook #'highlight-parentheses-mode))
 
 (use-package org
@@ -283,3 +298,6 @@ setting the args to `-t TYPE' instead of prompting."
    "C-c <"   #'helm-gtags-previous-history
    "C-c >"   #'helm-gtags-next-history))
 
+(let ((work-settings "~/.emacs.d/work-settings.el"))
+  (when (file-exists-p work-settings)
+    (load-file work-settings)))
