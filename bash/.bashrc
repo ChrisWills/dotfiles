@@ -37,4 +37,5 @@ fi
 alias emacs='emacs -nw'
 # Install Ruby Gems to ~/gems
 export GEM_HOME=$HOME/gems
-export PATH=$HOME/gems/bin:$PATH
+export CABAL_HOME=$HOME/.cabal-sandbox/bin/
+export PATH=$HOME/gems/bin:$CABAL_HOME:$PATH
