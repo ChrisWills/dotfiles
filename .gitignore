@@ -5,4 +5,5 @@ emacs/.emacs.d/recentf
 emacs/.emacs.d/*.elc
 emacs/.emacs.d/work-init.el
 emacs/.emacs.d/work-settings.el
+emacs/.emacs.d/places
 *~

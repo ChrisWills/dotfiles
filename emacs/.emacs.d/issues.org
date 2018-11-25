@@ -1,9 +1,12 @@
 * Features to add
-** quick funtion for editing dot-file - steal from spacemacs
-** add gtags 
+** DONE quick funtion for editing dot-file - steal from spacemacs
+   - State "DONE"       from              [2018-11-24 Sat 22:17]
+** DONE add gtags 
+   - State "DONE"       from              [2018-11-24 Sat 22:17]
    be careful since some keybinding in the spacemacs setup broke org mode
+** DONE add work stuff in a non-ip exposing way
+   - State "DONE"       from              [2018-11-24 Sat 22:18]
 ** Look into autoformatting tools for elisp
-** add work stuff in a non-ip exposing way
 ** fancy mode line (maybe)
    Might just need a couple additions since I'm starting to like the basic mode line
 ** consider git/hg integration mode
