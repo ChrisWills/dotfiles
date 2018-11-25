@@ -4,7 +4,12 @@
   (when (file-exists-p work-init)
     (load-file work-init)))
 
-;; Stop ivy minibuffers from leaving a weird blank space after a multi-line result
+;; When the cursor goes outside the window emacs usualy recenters the
+;; point. This is a bit jarring so this behaves a lot nicer.
+(setq scroll-conservatively 100)
+
+;; Stop ivy minibuffers from leaving a weird blank space after a multi-line
+;; result
 ;; This turned out to be more annoying than the original behavior...
 ;;(setq resize-mini-windows t)
 
@@ -15,16 +20,41 @@
 ;; Automatically move cursor to help windows
 (setq help-window-select t)
 
+;; Save location within a file
+(save-place-mode t)
+
 (if (fboundp 'menu-bar-mode)   (menu-bar-mode   -1))
 (if (fboundp 'tool-bar-mode)   (tool-bar-mode   -1))
 (if (fboundp 'scroll-bar-mode) (scroll-bar-mode -1))
 
-(global-hl-line-mode 1)                       ; highlight current line
-(setq-default indent-tabs-mode nil)           ; use spaces instead of tabs
-(setq-default tab-width 2)                    ; 2-space tabs
-(setq-default fill-column 80)                 ; 80 character line width
-(electric-indent-mode 1)                      ; smart auto-indent
-(setq-default electric-indent-inhibit t)      ;  ... disable indenting previous line (WHY?!)
+
+(setq mode-line-format
+      '(evil-mode-line-tag
+        "%e"
+        mode-line-front-space
+        mode-line-mule-info
+        mode-line-client
+        mode-line-modified
+        mode-line-remote
+        mode-line-frame-identification
+        mode-line-buffer-identification
+        "   "
+        mode-line-position
+        ;;evil-mode-line-tag
+        (vc-mode vc-mode)
+        "  "
+        mode-line-modes
+        mode-line-misc-info
+        mode-line-end-spaces))
+
+
+(column-number-mode 1)                       ; show column numbers in mode line
+(global-hl-line-mode 1)                      ; highlight current line
+(setq-default indent-tabs-mode nil)          ; use spaces instead of tabs
+(setq-default tab-width 2)                   ; 2-space tabs
+(setq-default fill-column 80)                ; 80 character line width
+(electric-indent-mode 1)                     ; smart auto-indent
+(setq-default electric-indent-inhibit t)     ; ... disable indenting previous line (WHY?!)
 (setq make-backup-files nil)
 (setq auto-save-default nil)
 (setq create-lockfiles nil)
@@ -61,7 +91,13 @@
 	  evil-org-mode
 	  which-key
     shackle
-    s))
+    s
+    company-mode
+    ox-twbs
+    tuareg-mode
+    haskell-mode
+    ghc-mod
+    ))
 
 (load-theme 'jbeans t)
 
@@ -72,6 +108,11 @@
 (require 'general)
 (require 'help-fns+)
 (require 's)
+
+;; Disable automatic completion for now
+(setq company-idle-delay nil)
+;; Enable company mode everywhere
+(add-hook 'after-init-hook 'global-company-mode)
 
 ;; Starting to question how helpful this actually is...
 (require 'smartparens-config)
@@ -170,8 +211,12 @@ setting the args to `-t TYPE' instead of prompting."
   (interactive)
   (cw/counsel-rg-with-type '("lisp") "rg (lisp)"))
 
+;;(general-define-key
+;; :keymaps '(insert)
+;; "C-c c" '(company-complete :which-key "company-complete"))
+
 (general-define-key
- :keymaps '(motion)
+ :keymaps '(normal motion)
   "SPC" nil
   ","   nil)
 
@@ -191,6 +236,7 @@ setting the args to `-t TYPE' instead of prompting."
  "f f"   #'helm-find-files
  ;;"f f"   #'counsel-find-file
  "f j"   #'dired-jump
+ "f e d" #'(lambda () (interactive) (switch-to-buffer (find-file-noselect "~/.emacs.d/init.el")))
  ;; Buffers
  "b"   '(:ignore t :which-key "buffers")
  "TAB"   '(evil-switch-to-windows-last-buffer :which-key "switch-to-last-buffer")
@@ -276,8 +322,8 @@ setting the args to `-t TYPE' instead of prompting."
       :config
       (add-hook 'org-mode-hook 'evil-org-mode)
       (add-hook 'evil-org-mode-hook
-		(lambda ()
-		  (evil-org-set-key-theme)))
+                (lambda ()
+                  (evil-org-set-key-theme)))
       (require 'evil-org-agenda)
       (evil-org-agenda-set-keys)))
   (progn
@@ -286,24 +332,24 @@ setting the args to `-t TYPE' instead of prompting."
       (add-hook 'org-mode-hook (lambda () (org-bullets-mode 1)))
       (setcdr org-bullets-bullet-map nil)))
   (setq org-todo-keywords
-	'((sequence "NEXT(n!)" "WAIT(w@\|)" "DPND(x@)" "DFER(r@)" "|" "DONE(d!)" "CNCL(c@)")))
+        '((sequence "NEXT(n!)" "WAIT(w@\|)" "DPND(x@)" "DFER(r@)" "|" "DONE(d!)" "CNCL(c@)")))
   (setq org-todo-keyword-faces
-	'(("NEXT" . (:weight bold :foreground "Pink"))
-	  ("WAIT" . (:weight bold :foreground "Pink"))
-	  ("DONE" . (:foreground "PaleGreen" :weight bold))))
+        '(("NEXT" . (:weight bold :foreground "Pink"))
+          ("WAIT" . (:weight bold :foreground "Pink"))
+          ("DONE" . (:foreground "PaleGreen" :weight bold))))
   (setq org-capture-templates
-	'(("n" "Next Action" entry
-	   (file "~/org/capture.org") "* NEXT %?\n  captured: %U"
-	   :empty-lines 1)
-	  ("N" "Next Action with Gmail Id" entry
-	   (file "~/org/capture.org") "* NEXT %?\n  captured: %U\n  [[gmail:%^{gmail id}][%\\1]]"
-	   :empty-lines 1)
-	  ("c" "Conversation memo" entry
-	   (file "~/org/conversations.org") "* %U\n %?"
+        '(("n" "Next Action" entry
+           (file "~/org/capture.org") "* NEXT %?\n  captured: %U"
+           :empty-lines 1)
+          ("N" "Next Action with Gmail Id" entry
+           (file "~/org/capture.org") "* NEXT %?\n  captured: %U\n  [[gmail:%^{gmail id}][%\\1]]"
+           :empty-lines 1)
+          ("c" "Conversation memo" entry
+           (file "~/org/conversations.org") "* %U\n %?"
 	   :empty-lines 1)))
   (setq org-link-abbrev-alist
-	'(("gmail" . "https://mail.google.com/mail/u/0/#all/%s")
-	  ("jira" . "https://jira.delacy.com:8443/browse/%s")))
+        '(("gmail" . "https://mail.google.com/mail/u/0/#all/%s")
+          ("jira" . "https://jira.delacy.com:8443/browse/%s")))
   (setq org-agenda-files '("~/org/")))
 
 ;; Requires "global" to be installed on the OS
@@ -331,6 +377,43 @@ setting the args to `-t TYPE' instead of prompting."
    "M-,"     #'helm-gtags-pop-stack
    "C-c <"   #'helm-gtags-previous-history
    "C-c >"   #'helm-gtags-next-history))
+
+
+(let ((opam-share (ignore-errors (car (process-lines "opam" "config" "var" "share")))))
+      (when (and opam-share (file-directory-p opam-share))
+       ;; Register Merlin
+       (add-to-list 'load-path (expand-file-name "emacs/site-lisp" opam-share))
+       (autoload 'merlin-mode "merlin" nil t nil)
+       ;; Automatically start it in OCaml buffers
+       (add-hook 'tuareg-mode-hook 'merlin-mode t)
+       (add-hook 'caml-mode-hook 'merlin-mode t)
+       ;; Use opam switch to lookup ocamlmerlin binary
+       (setq merlin-command 'opam)))
+
+(setq ghc-debug t) ; enable debug logging
+(autoload 'ghc-init "ghc" nil t)
+(autoload 'ghc-debug "ghc" nil t)
+(add-hook 'haskell-mode-hook (lambda () (ghc-init)))
+(add-hook 'haskell-mode-hook #'highlight-parentheses-mode)
+
+(custom-set-variables
+  '(haskell-process-suggest-remove-import-lines t)
+  '(haskell-process-auto-import-loaded-modules t)
+  '(haskell-process-log t)
+  '(haskell-process-type 'cabal-repl))
+(eval-after-load 'haskell-mode '(progn
+  (define-key haskell-mode-map (kbd "C-c C-l") 'haskell-process-load-or-reload)
+  (define-key haskell-mode-map (kbd "C-c C-z") 'haskell-interactive-switch)
+  (define-key haskell-mode-map (kbd "C-c C-n C-t") 'haskell-process-do-type)
+  (define-key haskell-mode-map (kbd "C-c C-n C-i") 'haskell-process-do-info)
+  (define-key haskell-mode-map (kbd "C-c C-n C-c") 'haskell-process-cabal-build)
+  (define-key haskell-mode-map (kbd "C-c C-n c") 'haskell-process-cabal)))
+(eval-after-load 'haskell-cabal '(progn
+  (define-key haskell-cabal-mode-map (kbd "C-c C-z") 'haskell-interactive-switch)
+  (define-key haskell-cabal-mode-map (kbd "C-c C-k") 'haskell-interactive-mode-clear)
+  (define-key haskell-cabal-mode-map (kbd "C-c C-c") 'haskell-process-cabal-build)
+  (define-key haskell-cabal-mode-map (kbd "C-c c") 'haskell-process-cabal)))
+
 
 (let ((work-settings "~/.emacs.d/work-settings.el"))
   (when (file-exists-p work-settings)

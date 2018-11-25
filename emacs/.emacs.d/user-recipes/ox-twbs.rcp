@@ -1,0 +1,6 @@
+(:name ox-twbs 
+       :website "https://github.com/marsmining/ox-twbs"
+       :description ""
+       :type github
+       :pkgname "marsmining/ox-twbs"
+       :features ox-twbs)

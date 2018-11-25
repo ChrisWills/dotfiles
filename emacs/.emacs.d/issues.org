@@ -12,3 +12,7 @@
 * Bugs
 ** counsel/ivy buffers get resized weirdly when an extra long line is in the output
    Consider trying to get counsel-rg to work with helm so we can drop ivy or make ivy nicer
+
+
+   
+
