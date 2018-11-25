@@ -6,7 +6,6 @@ import Control.Monad
 import XMonad
 import XMonad.Actions.SpawnOn
 import XMonad.Actions.WithAll (sinkAll)
---import XMonad.Actions.ConditionalKeys
 import XMonad.Actions.Navigation2D
 import XMonad.Hooks.DynamicLog
 import XMonad.Hooks.FadeInactive
@@ -24,6 +23,7 @@ import XMonad.Layout.Tabbed
 import XMonad.Layout.SubLayouts
 import XMonad.Layout.Named
 import XMonad.Layout.BoringWindows
+import XMonad.Layout.NoFrillsDecoration
 import qualified XMonad.Layout.WindowNavigation as WN
 import XMonad.Layout.Simplest
 import XMonad.Prompt
@@ -296,6 +296,19 @@ inactive    = base02
 focusColor  = blue
 unfocusColor = base02
 
+topBarTheme = def
+    { fontName              = barXFont
+    , inactiveBorderColor   = base03
+    , inactiveColor         = base03
+    , inactiveTextColor     = base03
+    , activeBorderColor     = active
+    , activeColor           = active
+    , activeTextColor       = active
+    , urgentBorderColor     = red
+    , urgentTextColor       = yellow
+    , decoHeight            = topbar
+    }
+
 myTabTheme = def
   { fontName              = barXFont
   , activeColor           = active
@@ -305,26 +318,6 @@ myTabTheme = def
   , activeTextColor       = base03
   , inactiveTextColor     = base00
   }
-
-tabs = named "Tabs"
-       $ avoidStruts
-       $ smartBorders
-       $ addTabs shrinkText myTabTheme
-       $ Simplest
-
-flexTiled = avoidStruts
-            $ WN.windowNavigation
-            $ boringAuto
-            $ addTabs shrinkText myTabTheme
-            $ subLayout [] (named "Tabs" $ Simplest) 
-            $ ResizableTall 1 (2/100) (1/2) []
-
-flexFull = avoidStruts
-            $ WN.windowNavigation
-            $ boringAuto
-            $ addTabs shrinkText myTabTheme
-            $ subLayout [] (named "Tabs" $ Simplest) 
-            $ noBorders Full 
 
 layoutHook' = avoidStruts $
 --    noBorders Full
@@ -336,6 +329,30 @@ layoutHook' = avoidStruts $
 --   ||| smartBorders simplestFloat
 --    ||| withIM (1%7) (Role "buddy_list") (smartBorders Grid) -- It would be cool to be able to pass a ManageHook in directly here...patch? 
 --        where tiled   = ResizableTall 1 (2/100) (1/2) []
+  where
+    -- addTopBar           = noFrillsDeco shrinkText topBarTheme
+    
+    tabs = named "Tabs"
+      $ avoidStruts
+      $ smartBorders
+      $ addTabs shrinkText myTabTheme
+      $ Simplest
+
+    flexTiled = avoidStruts
+      $ WN.windowNavigation
+      $ boringAuto
+      $ addTabs shrinkText myTabTheme
+      $ subLayout [] (named "Tabs" $ Simplest) 
+      $ ResizableTall 1 (2/100) (1/2) []
+
+    flexFull = avoidStruts
+      $ WN.windowNavigation
+      $ boringAuto
+      $ addTabs shrinkText myTabTheme
+      $ subLayout [] (named "Tabs" $ Simplest) 
+      $ noBorders Full 
+
+
   --- 
   -- color names are easier to remember:
 colorInvisible        = ""
