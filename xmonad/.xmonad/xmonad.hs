@@ -1,149 +1,62 @@
 {-# LANGUAGE DeriveDataTypeable #-}
 -- ~/.xmonad/xmonad.hs
+--import Control.Monad
+--import Data.Functor
+--import Data.List (find)
+--import Data.Maybe
+import Data.Monoid (Endo(..))
+--import Data.Ratio ((%))
+import Foreign.C.Types
+import Graphics.X11.Xlib.Display
+import qualified Data.Map as M
+--import qualified Data.Map.Strict as Map
+import qualified XMonad.Layout.WindowNavigation as WN
+import qualified XMonad.StackSet as W
+import qualified XMonad.Util.ExtensibleState as XS
 import System.Exit
 import System.IO
-import Control.Monad
+import System.IO.Error
+import System.Posix.Signals
+import System.Posix.Types
 import XMonad
+import XMonad.Actions.FloatKeys
+import XMonad.Actions.Navigation2D
 import XMonad.Actions.SpawnOn
 import XMonad.Actions.WithAll (sinkAll)
-import XMonad.Actions.Navigation2D
 import XMonad.Hooks.DynamicLog
 import XMonad.Hooks.FadeInactive
 import XMonad.Hooks.ManageDocks
 import XMonad.Hooks.ManageHelpers
 import XMonad.Hooks.SetWMName
 import XMonad.Hooks.UrgencyHook
-import XMonad.Layout.Grid
-import XMonad.Layout.NoBorders (smartBorders, noBorders)
-import XMonad.Layout.ResizableTile
-import XMonad.Layout.SimplestFloat
-import XMonad.Layout.IM
 import XMonad.Layout.BinarySpacePartition
-import XMonad.Layout.Tabbed
-import XMonad.Layout.SubLayouts
-import XMonad.Layout.Named
 import XMonad.Layout.BoringWindows
+--import XMonad.Layout.Grid
+--import XMonad.Layout.IM
+import XMonad.Layout.Named
+import XMonad.Layout.NoBorders (smartBorders, noBorders)
 import XMonad.Layout.NoFrillsDecoration
-import qualified XMonad.Layout.WindowNavigation as WN
+import XMonad.Layout.ResizableTile
 import XMonad.Layout.Simplest
+--import XMonad.Layout.SimplestFloat
+import XMonad.Layout.SubLayouts
+import XMonad.Layout.Tabbed
 import XMonad.Prompt
 import XMonad.Prompt.Shell
 import XMonad.Prompt.XMonad
 import XMonad.Util.EZConfig
 import XMonad.Util.NamedScratchpad
-import XMonad.Util.Run
-import XMonad.Util.Scratchpad (scratchpadSpawnAction, scratchpadManageHook, scratchpadFilterOutWorkspace)
-import qualified XMonad.StackSet as W
-import Graphics.X11.Xlib.Display
-import Foreign.C.Types
-import Data.Maybe
-import Data.Ratio ((%))
-import Data.Monoid (Endo(..))
-import Data.Functor
-import Data.List (find)
-import qualified XMonad.Util.ExtensibleState as XS
-import System.Posix.Signals
-import System.Posix.Types
-import System.IO.Error
-import qualified Data.Map as M
-import qualified Data.Map.Strict as Map
-import Control.Monad
-import XMonad.Actions.FloatKeys
--- import XMonad.Util.SpawnNamedPipe -- This is in the darcs version of contrib  
--- | This has been accepted as a patch to xmonad-contrib tip but adding it here
--- so that I'm not tied to running tip
-data NamedPipes = NamedPipes { pipeMap :: Map.Map String Handle }
-    deriving (Show, Typeable)
+--import XMonad.Util.Run
+--import XMonad.Util.Scratchpad (scratchpadSpawnAction, scratchpadManageHook, scratchpadFilterOutWorkspace)
 
-instance ExtensionClass NamedPipes where
-    initialValue = NamedPipes Map.empty 
-
--- | When 'spawnNamedPipe' is executed with a command "String" and a name
--- "String" respectively.  The command string is spawned with 'spawnPipe' (as
--- long as the name chosen hasn't been used already) and the "Handle" returned
--- is saved in Xmonad's state associated with the name "String". 
-spawnNamedPipe :: String -> String -> X ()
-spawnNamedPipe cmd name = do
-  b <- XS.gets (Map.member name . pipeMap) 
-  unless b $ do
-    h <- spawnPipe cmd 
-    XS.modify (NamedPipes . Map.insert name h . pipeMap)   
-
--- | Attempts to retrieve a "Handle" to a pipe previously stored in Xmonad's
--- state associated with the given string via a call to 'spawnNamedPipe'. If the
--- given string doesn't exist in the map stored in Xmonad's state Nothing is
--- returned.   
-getNamedPipe :: String -> X (Maybe Handle)
-getNamedPipe name = XS.gets (Map.lookup name . pipeMap)
+import XMonad.Actions.ConditionalKeys -- manually hacked into contrib by cwills to place nice with ghc-mod 
+import XMonad.Util.SpawnNamedPipe -- available in >= xmonad-contrib-0.12 
 
 data StartupProgs = StartupProgs { getPids :: [ProcessID] }
     deriving (Show, Typeable)
 
 instance ExtensionClass StartupProgs where
     initialValue = StartupProgs []
-
--- Proof of concept for xmonad mailing list
---data MasterPaneFlag = MasterPaneFlag { getFlag :: Bool }
---    deriving (Show, Typeable)
---
---instance ExtensionClass MasterPaneFlag where
---    initialValue = MasterPaneFlag False 
---
---pickIncrFun :: Bool -> X () 
---pickIncrFun flag = if flag then (sendMessage (IncMasterN (1))) else (sendMessage (IncMasterN 0))
---
---toggleMasterPane :: X ()
---toggleMasterPane  = do
---    flag <- XS.get 
---    XS.modify(MasterPaneFlag . not . getFlag)
---    asks config >>= \c -> setLayout (XMonad.layoutHook c) >> pickIncrFun (getFlag flag)
-     
--- $usage
--- Place this file in ~/.xmonad/lib/XMonad/Actions/ConditionalKeys.hs
---
---          TODO choose API and module split and document correctly.
---          next paragraph for separate modules, rather than combined
---          even though should merge this and PerWorkspaceKeys.
---
--- See also 'XMonad.Actions.PerWorkspaceKeys' from which this module is shamelessly
--- derived.  -- Use 'XMonad.Layout.Named' to shorten and distinguish the layout
--- descriptions you want to bind conditionally.
---
--- Add something like the following in your @~\/.xmonad\/xmonad.hs@:
---
--- >  import XMonad.Actions.ConditionalKeys
---
--- >  import XMonad.Layout.Named
--- >  import XMonad.Layout.ResizableTile
---
--- >     layoutHook = avoidStruts (named "MRT" (Mirror rt) ||| rt) ||| Full
--- >       where rt = ResizableTall 2 (1/118) (11/15) []
---
--- >     , ("C-M-h", bindOn LD [("MRT", sendMessage MirrorExpand), ("", sendMessage Shrink)]
--- >     , ("C-M-l", bindOn LD [("MRT", sendMessage MirrorShrink), ("", sendMessage Expand)]
--- >     , ("C-M-k", bindOn LD [("MRT", sendMessage Shrink), ("", sendMessage MirrorExpand)]
--- >     , ("C-M-j", bindOn LD [("MRT", sendMessage Expand), ("", sendMessage MirrorShrink)]
-
-
-data XCond = WS | LD
-
--- | Choose an action based on the current workspace id (WS) or
--- layout description (LD).
-chooseAction :: XCond -> (String->X()) -> X()
-chooseAction WS f = withWindowSet (f . W.currentTag)
-chooseAction LD f = withWindowSet (f . description . W.layout . W.workspace . W.current)
-
-
--- | If current workspace or layout string is listed, run the associated
--- action (only the first match counts!) If it isn't listed, then run the default
--- action (marked with empty string, \"\"), or do nothing if default isn't supplied.
-bindOn :: XCond -> [(String, X())] -> X()
-bindOn xc bindings = chooseAction xc $ chooser where
-    chooser xc = case find ((xc==).fst) bindings of
-        Just (_, action) -> action
-        Nothing -> case find ((""==).fst) bindings of
-            Just (_, action) -> action
-            Nothing -> return ()
 
 scratchpads :: [NamedScratchpad]
 scratchpads =
@@ -193,20 +106,13 @@ manageHook' = myNSManageHook scratchpads <+> composeOne
     , doWindowPropsMatch myCenterFloats -?> doCenterFloat  
     , doWindowPropsMatch myFloats       -?> doFloat  
     , isFullscreen                      -?> myDoFullFloat                           
-    --, doWindowPropsMatch myWebs       -?> doShift  "3:web"
-    --, doWindowPropsMatch myDevs       -?> doShift  "4:dev"
-    --, doWindowPropsMatch myWines      -?> doF(W.shift "6:wine")
     ] 
     where
         myIgnores       = [(resource,   ["desktop","desktop_window","notify-osd","stalonetray","trayer"])]
         myCenterFloats  = [(className,  ["VirtualBox","Xmessage","Save As...","XFontSel","Downloads","Nm-connection-editor","qemu","artha"])
                           ,(title,      ["Google Chrome Options","Chromium Options"])]
         myFloats        = [(className,  ["Gimp","ij-ImageJ"])]
---      myWebs          = [(className,  ["Navigator","Shiretoko","Firefox","Uzbl","uzbl","Uzbl-core","uzbl-core","Google-chrome","Chromium","Shredder","Mail"])]
---      myDevs          = [(className,  ["Eclipse","eclipse","Netbeans","Gvim"])]
---      myWines         = [(className,  ["Wine"])]
--- }}}
--- UrgencyHook {{{
+
 -- | This is the "ManageHook" that gets run on urgent windows. Any windows not
 -- caught by this manage hook are caught by logHook' and their workspace is
 -- highlighted in the Dzen topbar.
@@ -319,19 +225,10 @@ myTabTheme = def
   , inactiveTextColor     = base00
   }
 
-layoutHook' = avoidStruts $
---    noBorders Full
-  tabs
---    ||| smartBorders tiled
-  ||| smartBorders flexTiled 
-  ||| flexFull
---    ||| smartBorders (Mirror tiled)
---   ||| smartBorders simplestFloat
---    ||| withIM (1%7) (Role "buddy_list") (smartBorders Grid) -- It would be cool to be able to pass a ManageHook in directly here...patch? 
---        where tiled   = ResizableTall 1 (2/100) (1/2) []
+layoutHook' = tabs
+              ||| flexTiled 
+              ||| flexFull
   where
-    -- addTopBar           = noFrillsDeco shrinkText topBarTheme
-    
     tabs = named "Tabs"
       $ avoidStruts
       $ smartBorders
@@ -339,6 +236,7 @@ layoutHook' = avoidStruts $
       $ Simplest
 
     flexTiled = avoidStruts
+      $ smartBorders
       $ WN.windowNavigation
       $ boringAuto
       $ addTabs shrinkText myTabTheme
@@ -351,7 +249,6 @@ layoutHook' = avoidStruts $
       $ addTabs shrinkText myTabTheme
       $ subLayout [] (named "Tabs" $ Simplest) 
       $ noBorders Full 
-
 
   --- 
   -- color names are easier to remember:
@@ -374,7 +271,7 @@ focusedBorderColor'   = "#9F6C3B"
 barFont  = "Sauce Code Powerline:size=9"
 barXFont = "inconsolata:size=14"
 xftFont  = "xft:Sauce Code Powerline:pixelsize=18"
-mXPConfig :: XPConfig
+
 mXPConfig =
     def
         { font                  = xftFont
@@ -406,13 +303,14 @@ pcmds =
     , ("moveNode", sendMessage MoveNode)
     , ("unmerge", withFocused (sendMessage . UnMerge))
     , ("merge", withFocused (sendMessage . MergeAll))
-    , ("megeUp", (sendMessage . pullGroup $ U ))
+    , ("mergeUp", (sendMessage . pullGroup $ U ))
     ]
 
 dirKeys        = ["j","k","h","l"]
 arrowKeys      = ["<D>","<U>","<L>","<R>"]
 dirs           = [ D,  U,  L,  R ]
 
+myKeymap :: [(String, X ())] 
 myKeymap = 
   [   ("M-<Return>", spawn $ XMonad.terminal myConfig)
   ,   ("M-p", spawn "xterm")
@@ -474,24 +372,21 @@ myKeymap =
   [ ("M-M1-" ++ [key], screenWorkspace scr >>= flip whenJust (windows . W.view))
   | (key, scr)  <- zip "1234" [0,1,2,4] -- change to match your screen order and number of screens
   ]
-  
-spawnToWorkspace :: String -> String -> X ()
-spawnToWorkspace program workspace = do
-  spawn program
-  windows $ W.greedyView workspace
 
 getDefaultScreenWidth :: X CInt 
 getDefaultScreenWidth = withDisplay $ \dpy ->
     return $ displayWidth dpy $ defaultScreen dpy
 
 -- | Run this as a namedPipe so that we can update it with loghook
+myStatusBar :: CInt -> String 
 myStatusBar screenWidth =
   "dzen2 -x 0 -y '0' -h '16' -w "
   ++ show (screenWidth - 326)
   ++ " -ta 'l' -fg '#FFFFFF' -bg '#161616' -fn "
   ++ (show barFont) 
 
--- | These stay running during an xmonad session. We save the pids so we can kill these on shutdown/restart 
+-- | These stay running during an xmonad session. We save the pids so we can kill these on shutdown/restart
+startupApps :: CInt -> [String] 
 startupApps screenWidth =
      ["while true; do date +'%a %b %d %l:%M%p'; sleep 30; done | dzen2 -x "
       ++ show (screenWidth - 136)
@@ -507,6 +402,7 @@ startupApps screenWidth =
      ,"xscreensaver"]
 
 -- | These run once on startup and exit immediately so we don't care about their pids
+startupCmds :: String -> [String]
 startupCmds xmonadDir =
     ["xset r rate 200 60"
     ,"xrdb -load .Xdefaults"
@@ -537,6 +433,7 @@ cleanupHook = do
   io $ mapM_
     (\p -> catchIOError (signalProcess sigTERM p) (\_ -> return ()))
     (getPids pids)
+
 myConfig =
   def
   { terminal            = "xterm -e 'tmux -2'"
@@ -551,4 +448,5 @@ myConfig =
   , normalBorderColor   = normalBorderColor'
   , focusedBorderColor  = focusedBorderColor' }
 
+main :: IO ()
 main = xmonad $ withUrgencyHook myUrgencyHook myConfig
