@@ -27,27 +27,6 @@
 (if (fboundp 'tool-bar-mode)   (tool-bar-mode   -1))
 (if (fboundp 'scroll-bar-mode) (scroll-bar-mode -1))
 
-
-(setq mode-line-format
-      '(evil-mode-line-tag
-        "%e"
-        mode-line-front-space
-        mode-line-mule-info
-        mode-line-client
-        mode-line-modified
-        mode-line-remote
-        mode-line-frame-identification
-        mode-line-buffer-identification
-        "   "
-        mode-line-position
-        ;;evil-mode-line-tag
-        (vc-mode vc-mode)
-        "  "
-        mode-line-modes
-        mode-line-misc-info
-        mode-line-end-spaces))
-
-
 (column-number-mode 1)                       ; show column numbers in mode line
 (global-hl-line-mode 1)                      ; highlight current line
 (setq-default indent-tabs-mode nil)          ; use spaces instead of tabs
@@ -58,6 +37,9 @@
 (setq make-backup-files nil)
 (setq auto-save-default nil)
 (setq create-lockfiles nil)
+
+;; disable automatic type signature in echo area by default
+(setq global-eldoc-mode nil)
 
 (add-to-list 'load-path "~/.emacs.d/el-get/el-get")
 
@@ -120,10 +102,15 @@
   '((require 'smartparens)
     (sp-local-pair 'emacs-lisp-mode "'" nil :actions :rem)))
 (add-hook 'emacs-lisp-mode-hook #'smartparens-mode)
+(add-hook 'haskell-mode-hook #'smartparens-mode)
 
+;; Always create a new full-width window on the bottom third of the screen for
+;; helm and help windows
 (use-package shackle
   :init
-  (setq shackle-rules '(("\\`\\*helm.*?\\*\\'" :regexp t :align t :size 0.3)))
+  (setq shackle-rules '(("\\`\\*helm.*?\\*\\'" :regexp t :align t :size 0.3)
+                        ("\\`\\*Help\\*\\'" :regexp t :align t :size 0.3)
+                        ("\\`\\*Haskell Presentation\\*\\'" :regexp t :align t :size 0.3)))
   :config
   (shackle-mode))
 
@@ -217,12 +204,45 @@ setting the args to `-t TYPE' instead of prompting."
 
 (general-define-key
  :keymaps '(normal motion)
-  "SPC" nil
-  ","   nil)
+  "SPC" nil)
 
 (general-define-key
  :keymaps '(visual)
   "M->" '(eval-region :which-key "eval-region"))
+
+(general-define-key
+ :keymaps '(haskell-mode-map)
+ :states '(normal)
+ :prefix ","
+ "'" '(haskell-interactive-bring :which-key "repl")
+;; "c" compile-sub-tree
+;; "c c" compile
+;; "c p" list builds
+;; "e n" next-error
+;; "e d" type mismatch-diff
+;; "e a" other-error-location
+;; "g ."
+;; "g a" find alternate file
+;; "g f" jump fun
+;; "g I" jump to interface in new window
+;; "g i" jump to interface
+;; "g m" jump to module
+;; "g o" jump occurance
+;; "g G" def in new window
+ "g d" '(haskell-mode-jump-to-def-or-tag :which-key "jump-to-def")
+ "t"   '(haskell-process-do-type :which-key "type-of-expr")
+;; "H t" type enclosing
+;; "h T" type-expression
+;; "h h" find documentation
+;; "m" merlin/repl start/stop
+;; "s" send to repl/eval in repl jump to repl eval region in repl
+ "s f" '(haskell-process-load-file :which-key "send-file-to-repl")
+ )
+
+(general-define-key
+ :keymaps '(haskell-presentation-mode-map)
+ :states '(normal motion insert)
+ "q" (lambda () (interactive) (haskell-presentation-clear) (quit-window)))
 
 (general-define-key
  :keymaps '(override)
@@ -252,6 +272,7 @@ setting the args to `-t TYPE' instead of prompting."
  "w m"	 #'delete-other-windows
  "w d"   #'delete-window
  "a"     '(:ignore t :which-key "Applications")
+ "a c"   '(company-complete :which-key "company-complete")
  "a g"   '(:ignore t :which-key "Grep")
  "a g r" '(cw/counsel-rg-prompt-dir :which-key "counsel-rg-prompt-dir")
  "a g R" '(cw/counsel-rg-with-type :which-key "counsel-rg-prompt-type")
@@ -400,20 +421,19 @@ setting the args to `-t TYPE' instead of prompting."
   '(haskell-process-suggest-remove-import-lines t)
   '(haskell-process-auto-import-loaded-modules t)
   '(haskell-process-log t)
-  '(haskell-process-type 'cabal-repl))
-(eval-after-load 'haskell-mode '(progn
-  (define-key haskell-mode-map (kbd "C-c C-l") 'haskell-process-load-or-reload)
-  (define-key haskell-mode-map (kbd "C-c C-z") 'haskell-interactive-switch)
-  (define-key haskell-mode-map (kbd "C-c C-n C-t") 'haskell-process-do-type)
-  (define-key haskell-mode-map (kbd "C-c C-n C-i") 'haskell-process-do-info)
-  (define-key haskell-mode-map (kbd "C-c C-n C-c") 'haskell-process-cabal-build)
-  (define-key haskell-mode-map (kbd "C-c C-n c") 'haskell-process-cabal)))
-(eval-after-load 'haskell-cabal '(progn
-  (define-key haskell-cabal-mode-map (kbd "C-c C-z") 'haskell-interactive-switch)
-  (define-key haskell-cabal-mode-map (kbd "C-c C-k") 'haskell-interactive-mode-clear)
-  (define-key haskell-cabal-mode-map (kbd "C-c C-c") 'haskell-process-cabal-build)
-  (define-key haskell-cabal-mode-map (kbd "C-c c") 'haskell-process-cabal)))
+  '(haskell-process-type 'cabal-repl)
+  '(haskell-tags-on-save t)
+  '(haskell-doc-mode 0))
 
+(require 'haskell-interactive-mode)
+(require 'haskell-process)
+
+(setq haskell-process-use-presentation-mode t)
+(add-hook 'haskell-mode-hook 'interactive-haskell-mode)
+;; Disable haskell-doc-mode here because the haskell types in the notification
+;; area are really annoying. This is really just a hack that I don't fully understand.
+;; The first time you run C-c C-t after loading the repl, an error is thrown but after that everything works great
+(add-hook 'interactive-haskell-mode-hook '(setq haskell-doc-mode 0))
 
 (let ((work-settings "~/.emacs.d/work-settings.el"))
   (when (file-exists-p work-settings)
