@@ -38,6 +38,10 @@
 (setq auto-save-default nil)
 (setq create-lockfiles nil)
 
+(add-hook 'text-mode-hook 'turn-on-auto-fill)
+(add-hook 'text-mode-hook
+          '(lambda () (set-fill-column 80)))
+
 ;; disable automatic type signature in echo area by default
 (setq global-eldoc-mode nil)
 
@@ -240,6 +244,12 @@ setting the args to `-t TYPE' instead of prompting."
  )
 
 (general-define-key
+ :keymaps '(Info-mode-map)
+ :states '(normal motion)
+ "h" #'evil-backward-char
+ "l" #'evil-forward-char)
+
+(general-define-key
  :keymaps '(haskell-presentation-mode-map)
  :states '(normal motion insert)
  "q" (lambda () (interactive) (haskell-presentation-clear) (quit-window)))
@@ -281,6 +291,9 @@ setting the args to `-t TYPE' instead of prompting."
  "a g J" '(cw/counsel-rg-with-type-ocaml-or-c :which-key "counsel-rg-ocaml/c")
  "a g E" '(cw/counsel-rg-with-type-elisp :which-key "counsel-rg-elisp")
  "a g L" '(cw/counsel-rg-with-type-lisp :which-key "counsel-rg-lisp")
+ "a o"   '(:ignore t :which-key "Org")
+ "a o c" #'org-capture 
+ "a o a" #'org-agenda
  )
 
 (general-define-key
@@ -325,19 +338,14 @@ setting the args to `-t TYPE' instead of prompting."
   (add-hook 'emacs-lisp-mode-hook #'highlight-parentheses-mode))
 
 (use-package org
-  :defer t
+  :demand t
   :general
-  (:keymaps '(org-mode-map org-agenda-mode-map)
-   :states  '(normal motion emacs)
-   :prefix cw/normal-prefix
-   :non-normal-prefix cw/non-normal-prefix
-   "a o"   '(:ignore t :which-key "Org")
-   "a o c" #'org-capture 
-   "a o a" #'org-agenda)
   (:keymaps '(org-mode-map)
    :states  '(normal motion emacs)
    "C-c t" #'org-todo)
   :config
+  (progn
+    (use-package org-tempo))
   (progn
     (use-package evil-org
       :config
