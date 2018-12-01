@@ -75,7 +75,6 @@ myNSManageHook s = namedScratchpadManageHook s
         [ title =? "Music" -?> ask >>= \w -> liftX $ setOpacity w 0.7 >> idHook 
         , title =? "Scratchpad" -?> ask >>= \w -> liftX $ setOpacity w 0.7 >> idHook
         , title =? "Volume" -?> ask >>= \w -> liftX $ setOpacity w 0.8 >> idHook
-        --, title =? "Artha ~ The Open Thesaurus" -?> ask >>= \w -> liftX $ setOpacity w 0.8 >> idHook
         ]
 doWindowPropsMatchHelper :: (Query String, [String]) -> Query Bool -> Query Bool
 doWindowPropsMatchHelper (prop, l) acc = do
@@ -96,7 +95,7 @@ myDoFullFloat = doF W.focusDown <+> doFullFloat
 
 -- | A trick for moving an urgent window to the current workspace.
 doInYoFace :: ManageHook
-doInYoFace = do
+doInYoFace = do 
     cws <- currentWs
     doShift cws <+> doCenterFloat
 
@@ -352,7 +351,7 @@ myKeymap =
   ,   ("<XF86AudioLowerVolume>", spawn "amixer set Master 5%- unmute")
   ,   ("<XF86MonBrightnessDown>", spawn "xbacklight -dec 5")
   ,   ("<XF86MonBrightnessUp>", spawn "xbacklight -inc 5")
-  ,   ("<XF86ScreenSaver>", spawn "xscreensaver-command -lock")
+  ,   ("M-S-x", spawn "xscreensaver-command -lock")
   ,   ("M-o", namedScratchpadAction scratchpads "term")
   ,   ("M-s", namedScratchpadAction scratchpads "volume")
   ,   ("M-i", namedScratchpadAction scratchpads "music")
@@ -419,8 +418,8 @@ startupHook' = do
     xmonadDir <- getXMonadDir
     checkKeymap myConfig myKeymap
     spawnNamedPipe (myStatusBar screenWidth) "dzenPipe"
-    mapM spawn (startupCmds xmonadDir)
-    appPids <- mapM (\app -> io $ spawnPID app) (startupApps screenWidth)
+    mapM spawn $ startupCmds xmonadDir
+    appPids <- mapM (io . spawnPID) $ startupApps screenWidth
     XS.put (StartupProgs appPids)
     setWMName "LG3D"
     spawnOn "1" "google-chrome"
