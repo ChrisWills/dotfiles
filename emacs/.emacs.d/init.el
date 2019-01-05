@@ -83,6 +83,8 @@
     tuareg-mode
     haskell-mode
     ghc-mod
+    tramp
+    helm-tramp
     ))
 
 (load-theme 'jbeans t)
@@ -107,6 +109,7 @@
     (sp-local-pair 'emacs-lisp-mode "'" nil :actions :rem)))
 (add-hook 'emacs-lisp-mode-hook #'smartparens-mode)
 (add-hook 'haskell-mode-hook #'smartparens-mode)
+(add-hook 'python-mode-hook #'smartparens-mode)
 
 ;; Always create a new full-width window on the bottom third of the screen for
 ;; helm and help windows
@@ -213,6 +216,7 @@ setting the args to `-t TYPE' instead of prompting."
 (general-define-key
  :keymaps '(visual)
   "M->" '(eval-region :which-key "eval-region"))
+
 
 (general-define-key
  :keymaps '(haskell-mode-map)
@@ -322,6 +326,11 @@ setting the args to `-t TYPE' instead of prompting."
  "M-k"    #'ivy-previous-line
  "M-j"    #'ivy-next-line)
 
+(general-define-key
+ :keymaps '(python-mode-map)
+ "C-c c" #'comment-or-uncomment-region
+ )
+
 (setq ivy-height 15)
 (setq ivy-initial-inputs-alist nil)
 (setq ivy-format-function 'ivy-format-function-arrow)
@@ -429,7 +438,7 @@ setting the args to `-t TYPE' instead of prompting."
   '(haskell-process-suggest-remove-import-lines t)
   '(haskell-process-auto-import-loaded-modules t)
   '(haskell-process-log t)
-  '(haskell-process-type 'cabal-repl)
+  '(haskell-process-type 'auto)
   '(haskell-tags-on-save t)
   '(haskell-doc-mode 0))
 
