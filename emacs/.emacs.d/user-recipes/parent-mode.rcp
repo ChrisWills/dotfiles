@@ -1,0 +1,5 @@
+(:name parent-mode 
+       :website "https://github.com/Fanael/parent-mode" 
+       :description "dep for hightlight-numbers"
+       :type github
+       :pkgname "Fanael/parent-mode") 

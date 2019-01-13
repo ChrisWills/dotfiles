@@ -85,9 +85,18 @@
     ghc-mod
     tramp
     helm-tramp
+    color-theme-solarized
+    highlight-numbers
     ))
 
-(load-theme 'jbeans t)
+;;(load-theme 'jbeans t)
+(load-theme 'solarized t)
+(add-hook 'after-make-frame-functions
+          (lambda (frame)
+            (let ((mode (if (display-graphic-p frame) 'dark 'dark)))
+              (set-frame-parameter frame 'background-mode mode)
+              (set-terminal-parameter frame 'background-mode mode))
+            (enable-theme 'solarized)))
 
 (add-to-list 'load-path "~/.emacs.d/elisp")
 
@@ -110,6 +119,8 @@
 (add-hook 'emacs-lisp-mode-hook #'smartparens-mode)
 (add-hook 'haskell-mode-hook #'smartparens-mode)
 (add-hook 'python-mode-hook #'smartparens-mode)
+
+(add-hook 'python-mode-hook #'highlight-numbers-mode)
 
 ;; Always create a new full-width window on the bottom third of the screen for
 ;; helm and help windows
@@ -435,12 +446,19 @@ setting the args to `-t TYPE' instead of prompting."
 (add-hook 'haskell-mode-hook #'highlight-parentheses-mode)
 
 (custom-set-variables
-  '(haskell-process-suggest-remove-import-lines t)
-  '(haskell-process-auto-import-loaded-modules t)
-  '(haskell-process-log t)
-  '(haskell-process-type 'auto)
-  '(haskell-tags-on-save t)
-  '(haskell-doc-mode 0))
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(haskell-doc-mode 0)
+ '(haskell-process-auto-import-loaded-modules t)
+ '(haskell-process-log t)
+ '(haskell-process-suggest-remove-import-lines t)
+ '(haskell-process-type (quote auto))
+ '(haskell-tags-on-save t)
+ '(solarized-termcolors 256)
+ '(solarized-bold nil)
+ '(solarized-underline nil))
 
 (require 'haskell-interactive-mode)
 (require 'haskell-process)
@@ -455,3 +473,12 @@ setting the args to `-t TYPE' instead of prompting."
 (let ((work-settings "~/.emacs.d/work-settings.el"))
   (when (file-exists-p work-settings)
     (load-file work-settings)))
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(header-line ((t (:background "brightcyan" :foreground "black" :inverse-video t))))
+ '(match ((t (:background "brightcyan" :foreground "black" :inverse-video t))))
+ '(helm-selection ((t (:foreground "black"))))
+ )
