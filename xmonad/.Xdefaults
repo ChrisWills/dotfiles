@@ -3,48 +3,24 @@
 
 *customization:		-color
 
-!Black
-!*color0:                #161616
-!*color8:                #555753
-! Red
-!*color1:                #ff6565
-!*color9:                #ff8d8d
-! Green
-!*color2:                #93d44f
-!*color10:               #c8e7a8
-! Yellow
-!*color3:                #eab93d
-!*color11:               #ffc123
-! Blue
-!*color4:                #204a87
-!*color12:               #3465a4
-! Mangenta
-!*color5:                #706c9a
-!*color13:               #826ab1
-! Cyan
-!*color6:                #89b6e2
-!*color14:               #46a4ff
-! White
-!*color7:                #cccccc
-!*color15:               #ffffff
-
-
 xft.dpi:                96
 Xft.antialias:          true
 xft.hinting:            true
 xft.rgba:               rgb
 
+XTerm.VT100.translations: #override \
+Meta <Key> minus: smaller-vt-font() \n\
+Meta <Key> plus: larger-vt-font() \n\
+Meta <Key> KP_Subtract: smaller-vt-font() \n\
+Meta <Key> KP_Add: larger-vt-font() \n\
+Super <Key> minus: smaller-vt-font() \n\
+Super <Key> plus: larger-vt-font() \n\
+Super <Key> KP_Subtract: smaller-vt-font() \n\
+Super <Key> KP_Add: larger-vt-font() \n
+
 ! XTerm Config
-!XTerm*faceName:   DejaVu Sans Mono for Powerline		
-!XTerm*faceName:    SourceCodePro-Light
 XTerm*faceName:     Sauce Code Powerline 
-XTerm*faceSize:         12
-!XTerm*faceName:		Envy Code R
-!XTerm*faceName:		        Andale Mono
-!XTerm*faceName:		Bitstream Vera Sans Mono
-!XTerm*faceName:		Monaco
-!XTerm*faceSize:        12
-!XTerm*faceSize:         8
+XTerm*faceSize:         12 
 XTerm*allowTitleOps:    true 
 XTerm*metaSendsEscape:  true
 XTerm*colorBDMode:      true
@@ -59,90 +35,60 @@ XTerm*saveLines:        512
 XTerm*scrollBar:        false
 XTerm*bellIsUrgent:		true
 
-! XTerm Color Scheme
-XTerm*background:       #161616
-XTerm*foreground:       #a6a6a6
+#define S_base03        #002b36
+#define S_base02        #073642
+#define S_base01        #586e75
+#define S_base00        #657b83
+#define S_base0         #839496
+#define S_base1         #93a1a1
+#define S_base2         #eee8d5
+#define S_base3         #fdf6e3
 
-XTerm*colorBD:          #ffffff
-XTerm*cursorColor:      #ddccbb
+*background:            S_base03
+*foreground:            S_base0
+*fadeColor:             S_base03
+*cursorColor:           S_base1
+*pointerColorBackground:S_base01
+*pointerColorForeground:S_base1
 
-!Black
-XTerm*color0:           #161616
-XTerm*color8:           #555753
-! Red
-XTerm*color1:           #ff6565
-XTerm*color9:           #ff8d8d
-! Green
-XTerm*color2:           #93d44f
-XTerm*color10:          #c8e7a8
-! Yellow
-XTerm*color3:           #eab93d
-XTerm*color11:          #ffc123
-! Blue
-XTerm*color4:           #204a87
-XTerm*color12:          #3465a4
-! Mangenta
-XTerm*color5:           #706c9a
-XTerm*color13:          #826ab1
-! Cyan
-XTerm*color6:           #89b6e2
-XTerm*color14:          #46a4ff
-! White
-XTerm*color7:           #cccccc
-XTerm*color15:          #ffffff
+#define S_yellow        #b58900
+#define S_orange        #cb4b16
+#define S_red           #dc322f
+#define S_magenta       #d33682
+#define S_violet        #6c71c4
+#define S_blue          #268bd2
+#define S_cyan          #2aa198
+#define S_green         #859900
 
+!! black dark/light
+*color0:                S_base02
+*color8:                S_base03
 
-! Old urxvt Settings (now using xterm only)
+!! red dark/light
+*color1:                S_red
+*color9:                S_orange
 
-urxvt.termName:         rxvt-256color
-urxvt.imLocale:         en_US.UTF-8
-urxvt.loginShell:       true
-urxvt.saveLines:        1024
-!urxvt.font:		xft:DejaVu Sans Mono:pixelsize=12
-urxvt.font:		xft:Monaco:pixelsize=12
-urxvt.scrollBar:	false
-urxvt.shading:		40
-urxvt.skipBuiltinGlyphs:true
-urxvt.intensityStyles:  true
-urxvt.geometry:         91x26
-urxvt.inheritPixmap:    true
-urxvt.xftAntialias:     true
-urxvt.jumpScroll:       true
-urxvt.cursorBlink:      true
-urxvt.urgentOnBell:		true
+!! green dark/light
+*color2:                S_green
+*color10:               S_base01
 
-! urxvt Color Scheme
-urxvt.tintColor:        #1c1c1c
-urxvt.cursorColor:      #ddccbb
-urxvt.cursorColor2:     #000000
-urxvt.background:       #1c1c1c
-urxvt.foreground:       #a6a6a6
-urxvt.colorBD:          #ffffff
-urxvt.colorIT:          #bbbbbb
-urxvt.colorUL:          #999999
-urxvt.underlineColor:   #999999
+!! yellow dark/light
+*color3:                S_yellow
+*color11:               S_base00
 
-!Black
-urxvt*color0:           #000000
-urxvt*color8:           #555753
-! Red
-urxvt*color1:           #ff6565
-urxvt*color9:           #ff8d8d
-! Green
-urxvt*color2:           #93d44f
-urxvt*color10:          #c8e7a8
-! Yellow
-urxvt*color3:           #eab93d
-urxvt*color11:          #ffc123
-! Blue
-urxvt*color4:           #204a87
-urxvt*color12:          #3465a4
-! Mangenta
-urxvt*color5:           #706c9a
-urxvt*color13:          #826ab1
-! Cyan
-urxvt*color6:           #89b6e2
-urxvt*color14:          #46a4ff
-! White
-urxvt*color7:           #cccccc
-urxvt*color15:          #ffffff
+!! blue dark/light
+*color4:                S_blue
+*color12:               S_base0
+
+!! magenta dark/light
+*color5:                S_magenta
+*color13:               S_violet
+
+!! cyan dark/light
+*color6:                S_cyan
+*color14:               S_base1
+
+!! white dark/light
+*color7:                S_base2
+*color15:               S_base3
+
