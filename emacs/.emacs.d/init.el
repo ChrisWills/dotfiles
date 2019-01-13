@@ -481,4 +481,5 @@ setting the args to `-t TYPE' instead of prompting."
  '(header-line ((t (:background "brightcyan" :foreground "black" :inverse-video t))))
  '(match ((t (:background "brightcyan" :foreground "black" :inverse-video t))))
  '(helm-selection ((t (:foreground "black"))))
+ '(region ((t (:background "magenta" :inverse-video nil))))
  )
