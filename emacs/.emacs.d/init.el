@@ -481,5 +481,15 @@ setting the args to `-t TYPE' instead of prompting."
  '(header-line ((t (:background "brightcyan" :foreground "black" :inverse-video t))))
  '(match ((t (:background "brightcyan" :foreground "black" :inverse-video t))))
  '(helm-selection ((t (:foreground "black"))))
- '(region ((t (:background "magenta" :inverse-video nil))))
+ '(region ((t (:foreground "black" :background "brightcyan" :inverse-video nil))))
  )
+
+;; This is a dirty hack to make the forground colors show through the
+;; highlight due to some buggyness in the solarized theme
+;;(set-face-attribute
+;; 'region nil :background "brightmagenta"
+;; :foreground 'unspecified :inverse-video nil) 
+
+;;(set-face-attribute
+;; 'region nil :background "brightcyan"
+;; :foreground "black" :inverse-video nil) 
