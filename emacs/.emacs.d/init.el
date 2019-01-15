@@ -482,6 +482,8 @@ setting the args to `-t TYPE' instead of prompting."
  '(match ((t (:background "brightcyan" :foreground "black" :inverse-video t))))
  '(helm-selection ((t (:foreground "black"))))
  '(region ((t (:foreground "black" :background "brightcyan" :inverse-video nil))))
+ '(isearch ((t (:foreground "black" :background "yellow" :inverse-video nil))))
+ 
  )
 
 ;; This is a dirty hack to make the forground colors show through the
