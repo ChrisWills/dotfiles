@@ -155,16 +155,16 @@ logHook' = do
   fadeInactiveLogHook 0xdddddddd
   setWMName "LG3D"
   dynamicLogWithPP
-    $ def { ppCurrent         = dzenColor colorYellow colorDarkGrey . pad
-          , ppVisible         = dzenColor colorWhite colorDarkGrey . pad
+    $ def { ppCurrent         = dzenColor cyan base03 . pad
+          , ppVisible         = dzenColor cyan colorInvisible . pad
           , ppHidden          = dzenColor colorInvisible colorInvisible . pad
           , ppUrgent          = dzenColor colorMedGrey colorYellow
-          , ppHiddenNoWindows = dzenColor colorMedGrey colorDarkGrey . pad
+          , ppHiddenNoWindows = dzenColor colorInvisible colorInvisible . pad
           , ppWsSep           = ""
           , ppSep             = " | "
-          , ppLayout          = dzenColor colorYellow colorDarkGrey . (chooseLayoutIcon xmonadDir) 
+          , ppLayout          = dzenColor cyan base02 . (chooseLayoutIcon xmonadDir) 
           , ppSort            = fmap (.namedScratchpadFilterOutWorkspace) $ ppSort def
-          , ppTitle           = ("" ++) . dzenColor colorWhite colorDarkGrey . dzenEscape
+          , ppTitle           = ("" ++) . dzenColor base1 colorInvisible . dzenEscape
           , ppOutput          = maybe (\s -> return ()) hPutStrLn dzenHandle
           }
 
@@ -184,6 +184,7 @@ violet  = "#6c71c4"
 blue    = "#268bd2"
 cyan    = "#2aa198"
 green   = "#859900"
+
 
 -- sizes
 gap         = 10
@@ -264,20 +265,24 @@ colorWhite            = "#ffffff"
 colorLightBlue        = "#afdfff"
 colorDarkGrey2        = "#262626"
 colorLightGrey        = "#a6a6a6"
-normalBorderColor'    = "#262626"
-focusedBorderColor'   = "#9F6C3B"
+--normalBorderColor'    = "#262626"
+--focusedBorderColor'   = "#9F6C3B"
+normalBorderColor'    = base03 
+focusedBorderColor'   = yellow 
+borderWidth'          = 4
 
-barFont  = "Sauce Code Powerline:size=9"
+--barFont  = "Sauce Code Powerline:size=9"
+barFont  = "DejaVu Sans Mono Book:size=10"
 barXFont = "inconsolata:size=14"
 xftFont  = "xft:Sauce Code Powerline:pixelsize=18"
 
 mXPConfig =
     def
         { font                  = xftFont
-        , bgColor               = colorDarkGrey
-        , fgColor               = colorLightGrey
-        , bgHLight              = colorLightGrey
-        , fgHLight              = colorDarkGrey
+        , bgColor               = base02 
+        , fgColor               = base1 
+        , bgHLight              = yellow 
+        , fgHLight              = base02 
         , promptBorderWidth     = 0
         , height                = 20
         , historyFilter         = deleteConsecutive }
@@ -381,7 +386,8 @@ myStatusBar :: CInt -> String
 myStatusBar screenWidth =
   "dzen2 -x 0 -y '0' -h '16' -w "
   ++ show (screenWidth - 326)
-  ++ " -ta 'l' -fg '#FFFFFF' -bg '#161616' -fn "
+--  ++ " -ta 'l' -fg '#FFFFFF' -bg '#161616' -fn "
+  ++ " -ta 'l' -fg '#839496' -bg '#073642' -fn "
   ++ (show barFont) 
 
 -- | These stay running during an xmonad session. We save the pids so we can kill these on shutdown/restart
@@ -389,13 +395,14 @@ startupApps :: CInt -> [String]
 startupApps screenWidth =
      ["while true; do date +'%a %b %d %l:%M%p'; sleep 30; done | dzen2 -x "
       ++ show (screenWidth - 136)
-      ++" -y '0' -h '16' -w '136' -ta 'c' -fg '#FFFFFF' -bg '#161616' -fn "
+--      ++" -y '0' -h '16' -w '136' -ta 'c' -fg '#FFFFFF' -bg '#161616' -fn "
+      ++" -y '0' -h '16' -w '136' -ta 'c' -fg '#839496' -bg '#073642' -fn "
       ++ (show barFont) 
      ,"/usr/bin/stalonetray --geometry 12x1+"
        ++ show (screenWidth - 326)
        ++"+0 --max-geometry 12x1+"
        ++ show (screenWidth - 326)
-       ++"+0 --background '#161616' --icon-size 16 --icon-gravity NE --kludges=force_icons_size" 
+       ++"+0 --background '#073642' --icon-size 16 --icon-gravity NE --kludges=force_icons_size" 
      ,"batt_stat.exe"
      ,"nm-applet"
      ,"xscreensaver"]
@@ -445,7 +452,10 @@ myConfig =
   , manageHook          = (manageSpawn <+> manageHook') <+> manageDocks -- manageSpawn is needed for spawnOn to work
   , logHook             = logHook'
   , normalBorderColor   = normalBorderColor'
-  , focusedBorderColor  = focusedBorderColor' }
+  , focusedBorderColor  = focusedBorderColor'
+--  , borderWidth         = borderWidth'
+  }
+
 
 main :: IO ()
 main = xmonad $ withUrgencyHook myUrgencyHook myConfig
