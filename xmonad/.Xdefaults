@@ -1,4 +1,3 @@
-
 ! General settings
 
 *customization:		-color
@@ -18,10 +17,12 @@ Super <Key> plus: larger-vt-font() \n\
 Super <Key> KP_Subtract: smaller-vt-font() \n\
 Super <Key> KP_Add: larger-vt-font() \n
 
+
 ! XTerm Config
-XTerm*termName: 	xterm-256color
-XTerm*faceName:     Sauce Code Powerline 
+XTerm*termName: 	      xterm-256color
+XTerm*faceName:         Dejavu Sans Mono
 XTerm*faceSize:         12 
+XTerm*BorderWidth:      0
 XTerm*allowTitleOps:    true 
 XTerm*metaSendsEscape:  true
 XTerm*colorBDMode:      true
@@ -34,7 +35,7 @@ XTerm*multiScroll:      true
 XTerm*boldMode:         true
 XTerm*saveLines:        512
 XTerm*scrollBar:        false
-XTerm*bellIsUrgent:		true
+XTerm*bellIsUrgent:		  true
 
 #define S_base03        #002b36
 #define S_base02        #073642
@@ -64,31 +65,24 @@ XTerm*pointerColorForeground:S_base1
 !! black dark/light
 XTerm*color0:                S_base02
 XTerm*color8:                S_base03
-
 !! red dark/light
 XTerm*color1:                S_red
 XTerm*color9:                S_orange
-
 !! green dark/light
 XTerm*color2:                S_green
 XTerm*color10:               S_base01
-
 !! yellow dark/light
 XTerm*color3:                S_yellow
 XTerm*color11:               S_base00
-
 !! blue dark/light
 XTerm*color4:                S_blue
 XTerm*color12:               S_base0
-
 !! magenta dark/light
 XTerm*color5:                S_magenta
 XTerm*color13:               S_violet
-
 !! cyan dark/light
 XTerm*color6:                S_cyan
 XTerm*color14:               S_base1
-
 !! white dark/light
 XTerm*color7:                S_base2
 XTerm*color15:               S_base3

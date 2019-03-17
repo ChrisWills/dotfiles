@@ -157,7 +157,7 @@ logHook' = do
   dynamicLogWithPP
     $ def { ppCurrent         = dzenColor cyan base03 . pad
           , ppVisible         = dzenColor cyan colorInvisible . pad
-          , ppHidden          = dzenColor colorInvisible colorInvisible . pad
+          , ppHidden          = dzenColor cyan colorInvisible . pad
           , ppUrgent          = dzenColor colorMedGrey colorYellow
           , ppHiddenNoWindows = dzenColor colorInvisible colorInvisible . pad
           , ppWsSep           = ""
@@ -398,7 +398,7 @@ startupApps screenWidth =
 --      ++" -y '0' -h '16' -w '136' -ta 'c' -fg '#FFFFFF' -bg '#161616' -fn "
       ++" -y '0' -h '16' -w '136' -ta 'c' -fg '#839496' -bg '#073642' -fn "
       ++ (show barFont) 
-     ,"/usr/bin/stalonetray --geometry 12x1+"
+     ,"stalonetray --geometry 12x1+"
        ++ show (screenWidth - 326)
        ++"+0 --max-geometry 12x1+"
        ++ show (screenWidth - 326)

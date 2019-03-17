@@ -87,6 +87,7 @@
     helm-tramp
     color-theme-solarized
     highlight-numbers
+    magit
     ))
 
 ;;(load-theme 'jbeans t)
@@ -119,7 +120,6 @@
 (add-hook 'emacs-lisp-mode-hook #'smartparens-mode)
 (add-hook 'haskell-mode-hook #'smartparens-mode)
 (add-hook 'python-mode-hook #'smartparens-mode)
-
 (add-hook 'python-mode-hook #'highlight-numbers-mode)
 
 ;; Always create a new full-width window on the bottom third of the screen for
@@ -261,8 +261,14 @@ setting the args to `-t TYPE' instead of prompting."
 (general-define-key
  :keymaps '(Info-mode-map)
  :states '(normal motion)
+ "RET" #'Info-follow-nearest-node
  "h" #'evil-backward-char
  "l" #'evil-forward-char)
+
+(defun cw/copy-key (keymap-from state key)
+     "Moves key binding from one keymap to another, deleting from the old location. "
+     (evil-define-key state keymap-from key (lookup-key keymap-from key)))
+;;(my-move-key minibuffer-local-map 'normal (kbd "C-j"))
 
 (general-define-key
  :keymaps '(haskell-presentation-mode-map)
@@ -387,7 +393,8 @@ setting the args to `-t TYPE' instead of prompting."
           ("WAIT" . (:weight bold :foreground "Pink"))
           ("DONE" . (:foreground "PaleGreen" :weight bold))))
   (setq org-capture-templates
-        '(("n" "Next Action" entry
+        '(
+          ("n" "Next Action" entry
            (file "~/org/capture.org") "* NEXT %?\n  captured: %U"
            :empty-lines 1)
           ("N" "Next Action with Gmail Id" entry
@@ -395,7 +402,11 @@ setting the args to `-t TYPE' instead of prompting."
            :empty-lines 1)
           ("c" "Conversation memo" entry
            (file "~/org/conversations.org") "* %U\n %?"
-	   :empty-lines 1)))
+	         :empty-lines 1)
+          ("p" "Protocol" entry (file+headline,"~/notes_from_chrome.org" "Inbox")
+           "* %^{Title}\nSource: %u, %c\n #+BEGIN_QUOTE\n%i\n#+END_QUOTE\n\n\n%?")
+          ("L" "Protocol Link" entry (file+headline ,"~/notes_from_chrome.org" "Inbox")
+           "* %? [[%:link][%:description]] \nCaptured On: %U")))
   (setq org-link-abbrev-alist
         '(("gmail" . "https://mail.google.com/mail/u/0/#all/%s")
           ("jira" . "https://jira.delacy.com:8443/browse/%s")))
@@ -469,6 +480,18 @@ setting the args to `-t TYPE' instead of prompting."
 ;; area are really annoying. This is really just a hack that I don't fully understand.
 ;; The first time you run C-c C-t after loading the repl, an error is thrown but after that everything works great
 (add-hook 'interactive-haskell-mode-hook '(setq haskell-doc-mode 0))
+
+;; Org-babel stuff
+(org-babel-do-load-languages
+ 'org-babel-load-languages
+ '((python . t)))
+
+;; Makes <tab> behave as expected in source blocks
+(setq org-src-preserve-indentation t)
+(setq org-src-tab-acts-natively t)
+
+(server-start)
+(require 'org-protocol)
 
 (let ((work-settings "~/.emacs.d/work-settings.el"))
   (when (file-exists-p work-settings)
