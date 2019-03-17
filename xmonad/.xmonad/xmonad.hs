@@ -227,6 +227,7 @@ myTabTheme = def
 
 layoutHook' = tabs
               ||| flexTiled 
+              ||| flexMirrorTiled 
               ||| flexFull
   where
     tabs = named "Tabs"
@@ -242,6 +243,14 @@ layoutHook' = tabs
       $ addTabs shrinkText myTabTheme
       $ subLayout [] (named "Tabs" $ Simplest) 
       $ ResizableTall 1 (2/100) (1/2) []
+
+    flexMirrorTiled = avoidStruts
+      $ smartBorders
+      $ WN.windowNavigation
+      $ boringAuto
+      $ addTabs shrinkText myTabTheme
+      $ subLayout [] (named "Tabs" $ Simplest) 
+      $ (Mirror (ResizableTall 1 (2/100) (1/2) []))
 
     flexFull = avoidStruts
       $ WN.windowNavigation
