@@ -425,7 +425,8 @@ startupCmds xmonadDir =
     ,"convert -size 1600x900 xc:black " ++ xmonadDir ++ "/.wallpaper.png"
     ,"xbacklight -set 70"
     ,"nm-applet"
-    ,"feh --bg-fill " ++ xmonadDir ++ "/.wallpaper.png"
+    --,"feh --bg-fill " ++ xmonadDir ++ "/.wallpaper.png"
+    ,"xsetroot -bg black"
     ,"xfce4-power-manager"]
 
 startupHook' :: X ()
