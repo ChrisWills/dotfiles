@@ -8,4 +8,6 @@ emacs/.emacs.d/work-settings.el
 emacs/.emacs.d/places
 emacs/.emacs.d/bookmarks
 xmonad/.xmonad/TAGS
+xmonad/.xmonad/prompt-history
+xmonad/.xmonad/xmonad.state
 *~
