@@ -490,8 +490,8 @@ setting the args to `-t TYPE' instead of prompting."
 (setq org-src-preserve-indentation t)
 (setq org-src-tab-acts-natively t)
 
-(server-start)
-(require 'org-protocol)
+;;(server-start)
+;;(require 'org-protocol)
 
 (let ((work-settings "~/.emacs.d/work-settings.el"))
   (when (file-exists-p work-settings)
