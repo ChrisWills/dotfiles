@@ -22,13 +22,13 @@ export PROMPT_COMMAND="${PROMPT_COMMAND:+$PROMPT_COMMAND$'\n'}history -a; histor
 
 # fix color-233 to be #161616
 #(trick emacs into using my exact background color)
-if [ -z ${TMUX+x} ]; then
-	#TMUX not in use pass directly to xterm
-	printf '\033]4;233;rgb:16/16/16\007'
-else
-	#TMUX in use, wrap in special pass-thru sequence
-	printf '\ePtmux;\e\033]4;233;rgb:16/16/16\007\e\\'
-fi
+#if [ -z ${TMUX+x} ]; then
+#	#TMUX not in use pass directly to xterm
+#	printf '\033]4;233;rgb:16/16/16\007'
+#else
+#	#TMUX in use, wrap in special pass-thru sequence
+#	printf '\ePtmux;\e\033]4;233;rgb:16/16/16\007\e\\'
+#fi
 
 # Uncomment the following line if you don't like systemctl's auto-paging feature:
 # export SYSTEMD_PAGER=

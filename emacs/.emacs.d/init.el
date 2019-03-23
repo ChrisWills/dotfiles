@@ -85,9 +85,19 @@
     ghc-mod
     tramp
     helm-tramp
+    color-theme-solarized
+    highlight-numbers
+    magit
     ))
 
-(load-theme 'jbeans t)
+;;(load-theme 'jbeans t)
+(load-theme 'solarized t)
+(add-hook 'after-make-frame-functions
+          (lambda (frame)
+            (let ((mode (if (display-graphic-p frame) 'dark 'dark)))
+              (set-frame-parameter frame 'background-mode mode)
+              (set-terminal-parameter frame 'background-mode mode))
+            (enable-theme 'solarized)))
 
 (add-to-list 'load-path "~/.emacs.d/elisp")
 
@@ -110,6 +120,7 @@
 (add-hook 'emacs-lisp-mode-hook #'smartparens-mode)
 (add-hook 'haskell-mode-hook #'smartparens-mode)
 (add-hook 'python-mode-hook #'smartparens-mode)
+(add-hook 'python-mode-hook #'highlight-numbers-mode)
 
 ;; Always create a new full-width window on the bottom third of the screen for
 ;; helm and help windows
@@ -250,8 +261,14 @@ setting the args to `-t TYPE' instead of prompting."
 (general-define-key
  :keymaps '(Info-mode-map)
  :states '(normal motion)
+ "RET" #'Info-follow-nearest-node
  "h" #'evil-backward-char
  "l" #'evil-forward-char)
+
+(defun cw/copy-key (keymap-from state key)
+     "Moves key binding from one keymap to another, deleting from the old location. "
+     (evil-define-key state keymap-from key (lookup-key keymap-from key)))
+;;(my-move-key minibuffer-local-map 'normal (kbd "C-j"))
 
 (general-define-key
  :keymaps '(haskell-presentation-mode-map)
@@ -376,7 +393,8 @@ setting the args to `-t TYPE' instead of prompting."
           ("WAIT" . (:weight bold :foreground "Pink"))
           ("DONE" . (:foreground "PaleGreen" :weight bold))))
   (setq org-capture-templates
-        '(("n" "Next Action" entry
+        '(
+          ("n" "Next Action" entry
            (file "~/org/capture.org") "* NEXT %?\n  captured: %U"
            :empty-lines 1)
           ("N" "Next Action with Gmail Id" entry
@@ -384,7 +402,11 @@ setting the args to `-t TYPE' instead of prompting."
            :empty-lines 1)
           ("c" "Conversation memo" entry
            (file "~/org/conversations.org") "* %U\n %?"
-	   :empty-lines 1)))
+	         :empty-lines 1)
+          ("p" "Protocol" entry (file+headline,"~/notes_from_chrome.org" "Inbox")
+           "* %^{Title}\nSource: %u, %c\n #+BEGIN_QUOTE\n%i\n#+END_QUOTE\n\n\n%?")
+          ("L" "Protocol Link" entry (file+headline ,"~/notes_from_chrome.org" "Inbox")
+           "* %? [[%:link][%:description]] \nCaptured On: %U")))
   (setq org-link-abbrev-alist
         '(("gmail" . "https://mail.google.com/mail/u/0/#all/%s")
           ("jira" . "https://jira.delacy.com:8443/browse/%s")))
@@ -435,12 +457,19 @@ setting the args to `-t TYPE' instead of prompting."
 (add-hook 'haskell-mode-hook #'highlight-parentheses-mode)
 
 (custom-set-variables
-  '(haskell-process-suggest-remove-import-lines t)
-  '(haskell-process-auto-import-loaded-modules t)
-  '(haskell-process-log t)
-  '(haskell-process-type 'auto)
-  '(haskell-tags-on-save t)
-  '(haskell-doc-mode 0))
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(haskell-doc-mode 0)
+ '(haskell-process-auto-import-loaded-modules t)
+ '(haskell-process-log t)
+ '(haskell-process-suggest-remove-import-lines t)
+ '(haskell-process-type (quote auto))
+ '(haskell-tags-on-save t)
+ '(solarized-termcolors 256)
+ '(solarized-bold nil)
+ '(solarized-underline nil))
 
 (require 'haskell-interactive-mode)
 (require 'haskell-process)
@@ -452,6 +481,40 @@ setting the args to `-t TYPE' instead of prompting."
 ;; The first time you run C-c C-t after loading the repl, an error is thrown but after that everything works great
 (add-hook 'interactive-haskell-mode-hook '(setq haskell-doc-mode 0))
 
+;; Org-babel stuff
+(org-babel-do-load-languages
+ 'org-babel-load-languages
+ '((python . t)))
+
+;; Makes <tab> behave as expected in source blocks
+(setq org-src-preserve-indentation t)
+(setq org-src-tab-acts-natively t)
+
+;;(server-start)
+;;(require 'org-protocol)
+
 (let ((work-settings "~/.emacs.d/work-settings.el"))
   (when (file-exists-p work-settings)
     (load-file work-settings)))
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(header-line ((t (:background "brightcyan" :foreground "black" :inverse-video t))))
+ '(match ((t (:background "brightcyan" :foreground "black" :inverse-video t))))
+ '(helm-selection ((t (:foreground "black"))))
+ '(region ((t (:foreground "black" :background "brightcyan" :inverse-video nil))))
+ '(isearch ((t (:foreground "black" :background "yellow" :inverse-video nil))))
+ 
+ )
+
+;; This is a dirty hack to make the forground colors show through the
+;; highlight due to some buggyness in the solarized theme
+;;(set-face-attribute
+;; 'region nil :background "brightmagenta"
+;; :foreground 'unspecified :inverse-video nil) 
+
+;;(set-face-attribute
+;; 'region nil :background "brightcyan"
+;; :foreground "black" :inverse-video nil) 
