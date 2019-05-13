@@ -2,6 +2,9 @@
 
 *customization:		-color
 
+! Remember that these settings are all that matter if you are running just a WM
+! on top of Xorg (like xmonad). If you are running gnome-shell or something
+! like that these settings don't matter at all.
 Xft.dpi:                96
 Xft.antialias:          true 
 Xft.hinting:            true
