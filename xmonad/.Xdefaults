@@ -2,10 +2,13 @@
 
 *customization:		-color
 
-xft.dpi:                96
-Xft.antialias:          true
-xft.hinting:            true
-xft.rgba:               rgb
+Xft.dpi:                96
+Xft.antialias:          true 
+Xft.hinting:            true
+! Type of subpixel antialiasing (none, rgb, bgr, vrgb or vbgr)
+Xft.rgba:               none 
+! What degree of hinting to use (hintnone, hintslight, hintmedium, or hintfull)
+Xft.hintstyle: 		hintfull
 
 XTerm.VT100.translations: #override \
 Meta <Key> minus: smaller-vt-font() \n\

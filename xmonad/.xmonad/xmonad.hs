@@ -427,7 +427,8 @@ startupCmds xmonadDir =
     ,"nm-applet"
     --,"feh --bg-fill " ++ xmonadDir ++ "/.wallpaper.png"
     ,"xsetroot -bg black"
-    ,"xfce4-power-manager"]
+    ,"xfce4-power-manager"
+    ,"syncthing-gtk -m"]
 
 startupHook' :: X ()
 startupHook' = do
