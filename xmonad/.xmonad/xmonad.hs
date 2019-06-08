@@ -440,7 +440,7 @@ startupHook' = do
     appPids <- mapM (io . spawnPID) $ startupApps screenWidth
     XS.put (StartupProgs appPids)
     setWMName "LG3D"
-    spawnOn "1" "google-chrome"
+    spawnOn "1" "firefox"
     spawnOn "2" "xterm -e '/home/cwills/.xmonad/tmux-dev.sh'" 
     -- spawnOn "12" "pidgin"
 
