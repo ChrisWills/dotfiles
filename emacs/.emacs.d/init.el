@@ -486,7 +486,8 @@ setting the args to `-t TYPE' instead of prompting."
 ;; Org-babel stuff
 (org-babel-do-load-languages
  'org-babel-load-languages
- '((python . t)))
+ '((python . t)
+   (shell . t)))
 
 ;; Makes <tab> behave as expected in source blocks
 (setq org-src-preserve-indentation t)

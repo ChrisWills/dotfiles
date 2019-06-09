@@ -19,7 +19,6 @@ shopt -s histappend
 #  and reread it
 export PROMPT_COMMAND="${PROMPT_COMMAND:+$PROMPT_COMMAND$'\n'}history -a; history -c; history -r"
 
-
 # fix color-233 to be #161616
 #(trick emacs into using my exact background color)
 #if [ -z ${TMUX+x} ]; then
@@ -32,6 +31,14 @@ export PROMPT_COMMAND="${PROMPT_COMMAND:+$PROMPT_COMMAND$'\n'}history -a; histor
 
 # Uncomment the following line if you don't like systemctl's auto-paging feature:
 # export SYSTEMD_PAGER=
+
+### GPG SETUP BEGIN ###
+# private because function contains id of private gpg key
+source ${HOME}/dotfiles-private/bash/bashrc
+
+GPG_TTY=$(tty)
+export GPG_TTY
+### GPG SETUP END ###
 
 # User specific aliases and functions
 alias emacs='emacs -nw'
