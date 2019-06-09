@@ -33,8 +33,17 @@ export PROMPT_COMMAND="${PROMPT_COMMAND:+$PROMPT_COMMAND$'\n'}history -a; histor
 # export SYSTEMD_PAGER=
 
 ### GPG SETUP BEGIN ###
-# private because function contains id of private gpg key
-source ${HOME}/dotfiles-private/bash/bashrc
+function get_private_key_keygrip {
+	email="${1}"
+	gpg --with-keygrip --with-colons --list-secret-keys "${email}" | grep -A 3 '^ssb' |  grep '^grp' |awk -F: '{print $(NF-1)}'
+}
+
+function preset_passphrase {
+	echo "Enter passphrase:"
+	(local keygrip=$(get_private_key_keygrip "cwills.dev@gmail.com")
+  read -rs pass
+	/usr/libexec/gpg-preset-passphrase --preset -P "${pass}" "${keygrip}")
+}
 
 GPG_TTY=$(tty)
 export GPG_TTY
