@@ -1,0 +1,5 @@
+(:name helm-rg 
+       :website "https://github.com/cosmicexplorer/helm-rg"
+       :description "helm interface to rg"
+       :type github
+       :pkgname "cosmicexplorer/helm-rg") 
