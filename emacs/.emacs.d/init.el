@@ -89,6 +89,9 @@
     highlight-numbers
     magit
     emacs-bind-map
+    projectile
+    helm-projectile
+    helm-rg
     ))
 
 ;;(load-theme 'jbeans t)
@@ -109,6 +112,10 @@
 (require 's)
 (require 'evil-evilified-state)
 
+(server-start)
+(require 'org-protocol)
+
+
 ;; Disable automatic completion for now
 (setq company-idle-delay nil)
 ;; Enable company mode everywhere
@@ -123,6 +130,7 @@
 (add-hook 'haskell-mode-hook #'smartparens-mode)
 (add-hook 'python-mode-hook #'smartparens-mode)
 (add-hook 'python-mode-hook #'highlight-numbers-mode)
+
 
 ;; Always create a new full-width window on the bottom third of the screen for
 ;; helm and help windows
@@ -319,6 +327,20 @@ setting the args to `-t TYPE' instead of prompting."
  "a o a" #'org-agenda
  )
 
+(require 'projectile)
+
+(use-package projectile
+  :general
+  (:keymaps '(projectile-mode-map)
+            :states '(normal)
+            :prefix cw/normal-prefix
+            "a p" #'projectile-command-map)
+  :config
+  (projectile-mode +1))
+
+(defun cw/compile-ragefurnace ()
+  (org-publish-project "ragefurnace") )
+
 (general-define-key
  :keymaps '(helm-map)
  "TAB" #'helm-execute-persistent-action
@@ -405,9 +427,9 @@ setting the args to `-t TYPE' instead of prompting."
           ("c" "Conversation memo" entry
            (file "~/org/conversations.org") "* %U\n %?"
 	         :empty-lines 1)
-          ("p" "Protocol" entry (file+headline,"~/notes_from_chrome.org" "Inbox")
-           "* %^{Title}\nSource: %u, %c\n #+BEGIN_QUOTE\n%i\n#+END_QUOTE\n\n\n%?")
-          ("L" "Protocol Link" entry (file+headline ,"~/notes_from_chrome.org" "Inbox")
+          ("p" "Protocol" entry (file+headline "~/org/capture_from_web.org" "Inbox")
+           "* %a\nCaptured On: %U\nWebsite: %l\n\n%i\n%?")
+          ("l" "Protocol Link" entry (file+headline "~/org/capture_from_web.org" "Inbox")
            "* %? [[%:link][%:description]] \nCaptured On: %U")))
   (setq org-link-abbrev-alist
         '(("gmail" . "https://mail.google.com/mail/u/0/#all/%s")
@@ -440,7 +462,6 @@ setting the args to `-t TYPE' instead of prompting."
    "C-c <"   #'helm-gtags-previous-history
    "C-c >"   #'helm-gtags-next-history))
 
-
 (let ((opam-share (ignore-errors (car (process-lines "opam" "config" "var" "share")))))
       (when (and opam-share (file-directory-p opam-share))
        ;; Register Merlin
@@ -469,8 +490,13 @@ setting the args to `-t TYPE' instead of prompting."
  '(haskell-process-suggest-remove-import-lines t)
  '(haskell-process-type (quote auto))
  '(haskell-tags-on-save t)
- '(solarized-termcolors 256)
+ '(package-selected-packages (quote (projectile)))
+ '(safe-local-variable-values
+   (quote
+    ((projectile-project-compilation-cmd . cw/compile-ragefurnace)
+     (projectile-project-name . ragefurnace\.))))
  '(solarized-bold nil)
+ '(solarized-termcolors 256)
  '(solarized-underline nil))
 
 (require 'haskell-interactive-mode)
@@ -566,12 +592,10 @@ setting the args to `-t TYPE' instead of prompting."
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(header-line ((t (:background "brightcyan" :foreground "black" :inverse-video t))))
- '(match ((t (:background "brightcyan" :foreground "black" :inverse-video t))))
  '(helm-selection ((t (:foreground "black"))))
- '(region ((t (:foreground "black" :background "brightcyan" :inverse-video nil))))
  '(isearch ((t (:foreground "black" :background "yellow" :inverse-video nil))))
- 
- )
+ '(match ((t (:background "brightcyan" :foreground "black" :inverse-video t))))
+ '(region ((t (:foreground "black" :background "brightcyan" :inverse-video nil)))))
 
 ;; This is a dirty hack to make the forground colors show through the
 ;; highlight due to some buggyness in the solarized theme
