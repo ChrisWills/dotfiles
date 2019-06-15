@@ -115,6 +115,7 @@
 (server-start)
 (require 'org-protocol)
 
+(global-set-key (kbd "M-x") #'helm-M-x)
 
 ;; Disable automatic completion for now
 (setq company-idle-delay nil)
