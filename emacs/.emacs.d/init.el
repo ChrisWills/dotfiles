@@ -42,9 +42,25 @@
 (add-hook 'text-mode-hook
           '(lambda () (set-fill-column 80)))
 
+;; Disable automatic completion for now because it's annoying and I would rather only complete on demand
+(setq company-idle-delay nil)
+;; Enable company mode everywhere
+(add-hook 'after-init-hook 'global-company-mode)
+
+;;(general-define-key
+;; :keymaps '(insert)
+;; "C-c c" '(company-complete :which-key "company-complete"))
+
 ;; disable automatic type signature in echo area by default
 (setq global-eldoc-mode nil)
 
+;; Required for org-protocol to work
+(server-start)
+
+(add-to-list 'load-path "~/.emacs.d/elisp")
+
+
+;; EL-GET
 (add-to-list 'load-path "~/.emacs.d/el-get/el-get")
 
 (unless (require 'el-get nil 'noerror)
@@ -83,7 +99,7 @@
     tuareg-mode
     haskell-mode
     ghc-mod
-    tramp
+   ;; tramp
     helm-tramp
     color-theme-solarized
     highlight-numbers
@@ -92,8 +108,11 @@
     projectile
     helm-projectile
     helm-rg
+    exec-path-from-shell
     ))
+;;(exec-path-from-shell-initialize)
 
+;; THEME
 ;;(load-theme 'jbeans t)
 (load-theme 'solarized t)
 (add-hook 'after-make-frame-functions
@@ -103,24 +122,34 @@
               (set-terminal-parameter frame 'background-mode mode))
             (enable-theme 'solarized)))
 
-(add-to-list 'load-path "~/.emacs.d/elisp")
-
-(require 'ivy-rich)
-(ivy-rich-mode)
 (require 'general)
 (require 'help-fns+)
 (require 's)
 (require 'evil-evilified-state)
 
-(server-start)
-(require 'org-protocol)
+(setq tramp-remote-path
+      '(tramp-default-remote-path
+       "/bin" "/usr/bin" "/sbin" "/usr/sbin" "/usr/local/bin" "/usr/local/sbin"
+       "/local/bin" "/local/freeware/bin" "/local/gnu/bin" "/usr/freeware/bin"
+       "/usr/pkg/bin" "/usr/contrib/bin" "/opt/bin" "/opt/sbin" "/opt/local/bin"
+       "/run/current-system/sw/bin"))
 
-(global-set-key (kbd "M-x") #'helm-M-x)
+(let ((private-init "~/.emacs.d/private/private.el"))
+  (when (file-exists-p private-init)
+    (load-file private-init)))
 
-;; Disable automatic completion for now
-(setq company-idle-delay nil)
-;; Enable company mode everywhere
-(add-hook 'after-init-hook 'global-company-mode)
+(use-package ivy-rich
+  :demand t
+  :config
+  (ivy-rich-mode))
+
+(use-package helm
+  :bind (("M-x" . helm-M-x))
+  :general
+  (:keymaps '(helm-map)
+            "TAB" #'helm-execute-persistent-action
+            "<tab>" #'helm-execute-persistent-action
+            "C-z" #'helm-select-action))
 
 ;; Starting to question how helpful this actually is...
 (require 'smartparens-config)
@@ -131,7 +160,6 @@
 (add-hook 'haskell-mode-hook #'smartparens-mode)
 (add-hook 'python-mode-hook #'smartparens-mode)
 (add-hook 'python-mode-hook #'highlight-numbers-mode)
-
 
 ;; Always create a new full-width window on the bottom third of the screen for
 ;; helm and help windows
@@ -227,10 +255,6 @@ setting the args to `-t TYPE' instead of prompting."
   (interactive)
   (cw/counsel-rg-with-type '("lisp") "rg (lisp)"))
 
-;;(general-define-key
-;; :keymaps '(insert)
-;; "C-c c" '(company-complete :which-key "company-complete"))
-
 (general-define-key
  :keymaps '(normal motion)
   "SPC" nil)
@@ -238,7 +262,6 @@ setting the args to `-t TYPE' instead of prompting."
 (general-define-key
  :keymaps '(visual)
   "M->" '(eval-region :which-key "eval-region"))
-
 
 (general-define-key
  :keymaps '(haskell-mode-map)
@@ -328,25 +351,17 @@ setting the args to `-t TYPE' instead of prompting."
  "a o a" #'org-agenda
  )
 
-(require 'projectile)
-
 (use-package projectile
+  :demand t
   :general
   (:keymaps '(projectile-mode-map)
             :states '(normal)
             :prefix cw/normal-prefix
             "a p" #'projectile-command-map)
   :config
-  (projectile-mode +1))
-
-(defun cw/compile-ragefurnace ()
-  (org-publish-project "ragefurnace") )
-
-(general-define-key
- :keymaps '(helm-map)
- "TAB" #'helm-execute-persistent-action
- "<tab>" #'helm-execute-persistent-action
- "C-z" #'helm-select-action)
+  (projectile-mode +1)
+  (defun cw/compile-ragefurnace ()
+    (org-publish-project "ragefurnace")))
 
 ;; Make <escape> quit as much as possible 
 ;; Stolen from spacemacs/layers/+spacemacs/spacemacs-defaults/keybindings.el
@@ -370,8 +385,7 @@ setting the args to `-t TYPE' instead of prompting."
 
 (general-define-key
  :keymaps '(python-mode-map)
- "C-c c" #'comment-or-uncomment-region
- )
+ "C-c c" #'comment-or-uncomment-region)
 
 (setq ivy-height 15)
 (setq ivy-initial-inputs-alist nil)
@@ -381,11 +395,11 @@ setting the args to `-t TYPE' instead of prompting."
 (use-package highlight-parentheses
   :config
   (setq hl-paren-delay 0.2)
-  (setq hl-paren-colors '("Springgreen3"  
-			  "IndianRed1" 
-			  "IndianRed3" 
-			  "IndianRed4"))                                                                                                                 
-  (set-face-attribute 'hl-paren-face nil :weight 'ultra-bold) 
+  (setq hl-paren-colors '("Springgreen3"
+			  "IndianRed1"
+			  "IndianRed3"
+			  "IndianRed4"))
+  (set-face-attribute 'hl-paren-face nil :weight 'ultra-bold)
   (add-hook 'emacs-lisp-mode-hook #'highlight-parentheses-mode))
 
 (use-package org
@@ -404,38 +418,83 @@ setting the args to `-t TYPE' instead of prompting."
       (add-hook 'evil-org-mode-hook
                 (lambda ()
                   (evil-org-set-key-theme)))
-      (require 'evil-org-agenda)
+      (use-package evil-org-agenda)
       (evil-org-agenda-set-keys)))
   (progn
     (use-package org-bullets
       :config
       (add-hook 'org-mode-hook (lambda () (org-bullets-mode 1)))
       (setcdr org-bullets-bullet-map nil)))
+  (progn
+    (use-package org-protocol))
   (setq org-todo-keywords
-        '((sequence "NEXT(n!)" "WAIT(w@\|)" "DPND(x@)" "DFER(r@)" "|" "DONE(d!)" "CNCL(c@)")))
+        '((sequence "NEXT(n!)" "TODO(t!)" "PROJ(p@\|)" "WAIT(w@\|)" "DPND(x@)" "DFER(r@)" "|" "DONE(d!)" "CNCL(c@)")))
   (setq org-todo-keyword-faces
-        '(("NEXT" . (:weight bold :foreground "Pink"))
+        '(
+          ("NEXT" . (:weight bold :foreground "Pink"))
+          ("TODO" . (:weight bold :foreground "Pink"))
           ("WAIT" . (:weight bold :foreground "Pink"))
+          ("PROJ" . (:weight bold :foreground "Yellow"))
           ("DONE" . (:foreground "PaleGreen" :weight bold))))
   (setq org-capture-templates
         '(
           ("n" "Next Action" entry
-           (file "~/org/capture.org") "* NEXT %?\n  captured: %U"
+           (file+headline "~/org/lists.org" "Inbox") "* NEXT %?\n  captured: %U"
            :empty-lines 1)
           ("N" "Next Action with Gmail Id" entry
-           (file "~/org/capture.org") "* NEXT %?\n  captured: %U\n  [[gmail:%^{gmail id}][%\\1]]"
+           (file+headline "~/org/capture.org" "Inbox") "* NEXT %?\n  captured: %U\n  [[gmail:%^{gmail id}][%\\1]]"
            :empty-lines 1)
           ("c" "Conversation memo" entry
            (file "~/org/conversations.org") "* %U\n %?"
 	         :empty-lines 1)
-          ("p" "Protocol" entry (file+headline "~/org/capture_from_web.org" "Inbox")
+          ("p" "Protocol" entry (file+headline "~/org/lists.org" "Captured from org-protocol")
            "* %a\nCaptured On: %U\nWebsite: %l\n\n%i\n%?")
-          ("l" "Protocol Link" entry (file+headline "~/org/capture_from_web.org" "Inbox")
+          ("l" "Protocol Link" entry (file+headline "~/org/lists.org" "Captured from org-protocol")
            "* %? [[%:link][%:description]] \nCaptured On: %U")))
   (setq org-link-abbrev-alist
         '(("gmail" . "https://mail.google.com/mail/u/0/#all/%s")
           ("jira" . "https://jira.delacy.com:8443/browse/%s")))
-  (setq org-agenda-files '("~/org/")))
+  (setq org-agenda-files '("~/org/"))
+  ;; Makes <tab> behave as expected in source blocks
+  (setq org-src-preserve-indentation t)
+  (setq org-src-tab-acts-natively t)
+(setq org-publish-use-timestamps-flag nil)
+(setq org-publish-project-alist
+        '(("ragefurnace-index"
+           :base-directory "~/org/projects/ragefurnace.org/"
+           :base-extension "org"
+           :publishing-directory "~/public_html/ragefurnace.org/"
+           :recursive nil
+           :publishing-function org-html-publish-to-html)
+          ("ragefurnace-org-principles"
+           :base-directory "~/org/projects/ragefurnace.org/principles"
+           :base-extension "org"
+           :publishing-directory "~/public_html/ragefurnace.org/principles"
+           :recursive t 
+           :publishing-function org-html-publish-to-html)
+          ("ragefurnace-org-blog"
+           :base-directory "~/org/projects/ragefurnace.org/blog/"
+           :base-extension "org"
+           :publishing-directory  "~/public_html/ragefurnace.org/blog"
+           :recursive t 
+           :html-extension "html"
+           :headline-levels 4
+           ;;:publishing-function org-twbs-publish-to-html)
+           :publishing-function org-html-publish-to-html)
+          ("ragefurnace-static"
+           :base-directory "~/org/projects/ragefurnace.org/"
+           :base-extension "css\\|js\\|png\\|jpg\\|gif\\|pdf\\|mp3\\|ogg\\|swf"
+           :publishing-directory "~/public_html/ragefurnace.org/"
+           :recursive t
+           :publishing-function org-publish-attachment)
+          ("ragefurnace"
+           :components ("ragefurnace-index" "ragefurnace-org-principles" "ragefurnace-org-blog" "ragefurnace-static"))))
+  ;; Org-babel stuff
+(org-babel-do-load-languages
+   'org-babel-load-languages
+   '((python . t)
+     (shell . t)))
+  )
 
 ;; Requires "global" to be installed on the OS
 (use-package helm-gtags
@@ -510,19 +569,6 @@ setting the args to `-t TYPE' instead of prompting."
 ;; The first time you run C-c C-t after loading the repl, an error is thrown but after that everything works great
 (add-hook 'interactive-haskell-mode-hook '(setq haskell-doc-mode 0))
 
-;; Org-babel stuff
-(org-babel-do-load-languages
- 'org-babel-load-languages
- '((python . t)
-   (shell . t)))
-
-;; Makes <tab> behave as expected in source blocks
-(setq org-src-preserve-indentation t)
-(setq org-src-tab-acts-natively t)
-
-(let ((private-init "~/.emacs.d/private/private.el"))
-  (when (file-exists-p private-init)
-    (load-file private-init)))
 
 (defun flyspell-detect-ispell-args (&optional run-together)
   "if RUN-TOGETHER is true, spell check the CamelCase words."
