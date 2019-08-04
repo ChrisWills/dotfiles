@@ -45,6 +45,10 @@ function preset_passphrase {
 	/usr/libexec/gpg-preset-passphrase --preset -P "${pass}" "${keygrip}")
 }
 
+function spacemacs {
+	HOME=/home/cwills/spacemacs emacs --insecure
+}
+
 GPG_TTY=$(tty)
 export GPG_TTY
 ### GPG SETUP END ###
