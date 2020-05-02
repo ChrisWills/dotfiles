@@ -13,7 +13,7 @@ export HISTFILESIZE=50000
 export HISTCONTROL=ignoredups:erasedups
 # When the shell exits, append to the history file
 #  instead of overwriting it
-shopt -s histappend
+#shopt -s histappend
 
 # After each command, append to the history file
 #  and reread it
@@ -46,7 +46,7 @@ function preset_passphrase {
 }
 
 function spacemacs {
-	HOME=/home/cwills/spacemacs emacs --insecure
+	HOME=/home/cwills/spacemacs emacs -nw --insecure
 }
 
 GPG_TTY=$(tty)

@@ -62,6 +62,8 @@ scratchpads :: [NamedScratchpad]
 scratchpads =
     [ NS "volume" "xterm -title Volume -xrm \"XTerm*allowTitleOps:false\" -e alsamixer" (title =? "Volume") 
          (customFloating $ W.RationalRect 0 (1/48) (1/8) (47/48))
+    , NS "NetworkManager" "xterm -title NetworkManager -xrm \"XTerm*allowTitleOps:false\" -e nmtui connect" (title =? "NetworkManager") 
+         (customFloating $ W.RationalRect (1/10) (2/10) (8/10) (6/10))
     , NS "music" "xterm -title Music -xrm \"XTerm*allowTitleOps:false\" -e ncmpc" (title =? "Music")
          (customFloating $ W.RationalRect (1/10) (2/10) (8/10) (6/10))
     , NS "term" "xterm -title Scratchpad -xrm \"XTerm*allowTitleOps:false\"" (title =? "Scratchpad")
@@ -74,7 +76,7 @@ myNSManageHook s = namedScratchpadManageHook s
     <+> composeOne
         [ title =? "Music" -?> ask >>= \w -> liftX $ setOpacity w 0.7 >> idHook 
         , title =? "Scratchpad" -?> ask >>= \w -> liftX $ setOpacity w 0.7 >> idHook
-        , title =? "Volume" -?> ask >>= \w -> liftX $ setOpacity w 0.8 >> idHook
+        , title =? "Volume" -?> ask >>= \w -> liftX $ setOpacity w 0.8 >> idHook , title =? "NetworkManager" -?> ask >>= \w -> liftX $ setOpacity w 0.8 >> idHook
         ]
 doWindowPropsMatchHelper :: (Query String, [String]) -> Query Bool -> Query Bool
 doWindowPropsMatchHelper (prop, l) acc = do
@@ -332,7 +334,7 @@ myKeymap =
   ,   ("M-S-c", kill)
   ,   ("M-<Space>", sendMessage NextLayout)
   ,   ("M-S-<Space>", asks config >>= \c -> setLayout (XMonad.layoutHook c))
-  ,   ("M-n", refresh)
+  --,   ("M-n", refresh)
   ,   ("M-<Tab>", windows W.focusDown)
   ,   ("M-j", bindOn LD [("Tabs", return () ), ("Tabbed Full", windows W.focusDown), ("", focusDown) ])
   ,   ("M-k", bindOn LD [("Tabs", return () ), ("Tabbed Full", windows W.focusUp), ("", focusUp) ])
@@ -368,6 +370,7 @@ myKeymap =
   ,   ("M-S-x", spawn "xscreensaver-command -lock")
   ,   ("M-o", namedScratchpadAction scratchpads "term")
   ,   ("M-s", namedScratchpadAction scratchpads "volume")
+  ,   ("M-n", namedScratchpadAction scratchpads "NetworkManager")
   ,   ("M-i", namedScratchpadAction scratchpads "music")
   ,   ("M-w", namedScratchpadAction scratchpads "dict")
     --,   ("M-S-<Space>", layoutScreens 3 (fixedLayout [(Rectangle 0 0 1360 768),(Rectangle 1360 0 1280 1024),(Rectangle 2640 0 1280 1024)]))

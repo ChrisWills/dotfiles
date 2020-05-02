@@ -4,7 +4,7 @@
 
 ! Remember that these settings are all that matter if you are running just a WM
 ! on top of Xorg (like xmonad). If you are running gnome-shell or something
-! like that these settings don't matter at all.
+! like that these settings dont matter at all.
 Xft.dpi:                96
 Xft.antialias:          true 
 Xft.hinting:            true
@@ -25,9 +25,10 @@ Super <Key> KP_Add: larger-vt-font() \n
 
 
 ! XTerm Config
-XTerm*termName: 	      xterm-256color
+XTerm*termName:         xterm-256color
 XTerm*faceName:         Dejavu Sans Mono
-XTerm*faceSize:         12 
+!XTerm*faceName:         Inconsolata Medium
+XTerm*faceSize:         14 
 XTerm*BorderWidth:      0
 XTerm*allowTitleOps:    true 
 XTerm*metaSendsEscape:  true
@@ -42,6 +43,7 @@ XTerm*boldMode:         true
 XTerm*saveLines:        512
 XTerm*scrollBar:        false
 XTerm*bellIsUrgent:		  true
+!XTerm*selectToClipboard: true
 
 #define S_base03        #002b36
 #define S_base02        #073642
@@ -93,3 +95,51 @@ XTerm*color14:               S_base1
 XTerm*color7:                S_base2
 XTerm*color15:               S_base3
 
+.*font: monospace:size=14
+.*termName:         xterm-256color
+.*faceName:         Dejavu Sans Mono
+.*faceSize:         14 
+.*BorderWidth:      0
+.*allowTitleOps:    true 
+.*metaSendsEscape:  true
+.*colorBDMode:      true
+.*cursorBlink:      true
+.*veryBoldColors:   14
+.*loginShell:       true
+.*charClass:        33:48,35:48,37:48,43:48,45-47:48,64:48,95:48,126:48,35:48,58:48
+.*jumpScroll:       true
+.*multiScroll:      true
+.*boldMode:         true
+.*saveLines:        512
+.*scrollBar:        false
+.*bellIsUrgent:		  true
+.*background:            S_base03
+.*foreground:            S_base0
+.*fadeColor:             S_base03
+.*cursorColor:           S_base1
+.*pointerColorBackground:S_base01
+.*pointerColorForeground:S_base1
+!! black dark/light
+.*color0:                S_base02
+.*color8:                S_base03
+!! red dark/light
+.*color1:                S_red
+.*color9:                S_orange
+!! green dark/light
+.*color2:                S_green
+.*color10:               S_base01
+!! yellow dark/light
+.*color3:                S_yellow
+.*color11:               S_base00
+!! blue dark/light
+.*color4:                S_blue
+.*color12:               S_base0
+!! magenta dark/light
+.*color5:                S_magenta
+.*color13:               S_violet
+!! cyan dark/light
+.*color6:                S_cyan
+.*color14:               S_base1
+!! white dark/light
+.*color7:                S_base2
+.*color15:               S_base3

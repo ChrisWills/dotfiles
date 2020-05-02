@@ -5,13 +5,9 @@
 !remove mod1 = Alt_L
 !remove mod4 = Super_L
 !add mod1 = Super_L
-!add mod4 = Alt_L
-
-
 !clear lock
-clear mod1
-clear mod4
 
-add mod1 = Super_L Super_R
-add mod4 = Alt_R Alt_L Meta_L Meta_R
-!add lock = Control_L
+!clear mod1
+clear mod4
+keycode 172 = Hyper_L
+add mod4 = Super_L Super_R Hyper_L 
