@@ -557,7 +557,8 @@ setting the args to `-t TYPE' instead of prompting."
      (projectile-project-name . ragefurnace\.))))
  '(solarized-bold nil)
  '(solarized-termcolors 256)
- '(solarized-underline nil))
+ '(solarized-underline nil)
+ '(xterm-extra-capabilities (quote (getSelection setSelection))))
 
 (require 'haskell-interactive-mode)
 (require 'haskell-process)
