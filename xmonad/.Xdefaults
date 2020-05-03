@@ -13,16 +13,9 @@ Xft.rgba:               none
 ! What degree of hinting to use (hintnone, hintslight, hintmedium, or hintfull)
 Xft.hintstyle: 		hintfull
 
-XTerm.VT100.translations: #override \
-Meta <Key> minus: smaller-vt-font() \n\
-Meta <Key> plus: larger-vt-font() \n\
-Meta <Key> KP_Subtract: smaller-vt-font() \n\
-Meta <Key> KP_Add: larger-vt-font() \n\
-Super <Key> minus: smaller-vt-font() \n\
-Super <Key> plus: larger-vt-font() \n\
-Super <Key> KP_Subtract: smaller-vt-font() \n\
-Super <Key> KP_Add: larger-vt-font() \n
-
+XTerm*VT100.Translations: #override \
+                 Ctrl Shift <Key>V:    insert-selection(CLIPBOARD) \n\
+                 Ctrl Shift <Key>C:    copy-selection(CLIPBOARD)
 
 ! XTerm Config
 XTerm*termName:         xterm-256color
@@ -43,6 +36,7 @@ XTerm*boldMode:         true
 XTerm*saveLines:        512
 XTerm*scrollBar:        false
 XTerm*bellIsUrgent:		  true
+XTerm*allowWindowOps: true
 !XTerm*selectToClipboard: true
 
 #define S_base03        #002b36
@@ -95,6 +89,7 @@ XTerm*color14:               S_base1
 XTerm*color7:                S_base2
 XTerm*color15:               S_base3
 
+.*allowWindowOps: true
 .*font: monospace:size=14
 .*termName:         xterm-256color
 .*faceName:         Dejavu Sans Mono

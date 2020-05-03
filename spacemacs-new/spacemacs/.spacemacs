@@ -31,6 +31,7 @@ values."
    ;; List of configuration layers to load.
    dotspacemacs-configuration-layers
    '(
+     python
      ansible
      yaml
      ocaml
@@ -63,7 +64,7 @@ values."
    ;; A list of packages that cannot be updated.
    dotspacemacs-frozen-packages '()
    ;; A list of packages that will not be installed and loaded.
-   dotspacemacs-excluded-packages '(spaceline)
+   dotspacemacs-excluded-packages '(spaceline rainbow-delimiters)
    ;; Defines the behaviour of Spacemacs when installing packages.
    ;; Possible values are `used-only', `used-but-keep-unused' and `all'.
    ;; `used-only' installs only explicitly used packages and uninstall any
@@ -314,6 +315,27 @@ This is the place where most of your configurations should be done. Unless it is
 explicitly specified that a variable should be set before a package is loaded,
 you should place your code here."
 
+(setq whitespace-display-mappings
+      '(
+        (space-mark   ?\     [?·]     [?.])		; space - middle dot
+        (space-mark   ?\xA0  [?¤]     [?_])		; hard space - currency sign
+        ;; NEWLINE is displayed using the face `whitespace-newline'
+        ;;(newline-mark ?\n    [?$ ?\n])			; eol - dollar sign
+        ;; (newline-mark ?\n    [?↵ ?\n] [?$ ?\n])	; eol - downwards arrow
+        ;; (newline-mark ?\n    [?¶ ?\n] [?$ ?\n])	; eol - pilcrow
+        ;; (newline-mark ?\n    [?¯ ?\n]  [?$ ?\n])	; eol - overscore
+        (newline-mark ?\n    [?¬ ?\n]  [?$ ?\n])	; eol - negation
+        ;; (newline-mark ?\n    [?° ?\n]  [?$ ?\n])	; eol - degrees
+        ;;
+        ;; WARNING: the mapping below has a problem.
+        ;; When a TAB occupies exactly one column, it will display the
+        ;; character ?\xBB at that column followed by a TAB which goes to
+        ;; the next TAB column.
+        ;; If this is a problem for you, please, comment the line below.
+        (tab-mark     ?\t    [?» ?\t] [?\\ ?\t])	; tab - right guillemet
+        ))
+
+
   (defun cw/counsel-rg-with-prefix-arg (&rest args)
     (let ((current-prefix-arg '(4)))
       (apply #'counsel-rg args)))
@@ -331,6 +353,7 @@ through to the underlying function"
     "a g r" #'cw/counsel-rg-prompt-dir)
 
   (with-eval-after-load 'org
+    (require 'org-tempo)
     (spacemacs/set-leader-keys
       "a o c" #'org-capture
       "a o a" #'org-agenda)
@@ -437,7 +460,7 @@ through to the underlying function"
  '(evil-want-Y-yank-to-eol nil)
  '(package-selected-packages
    (quote
-    (jinja2-mode ansible-doc ansible yaml-mode utop tuareg caml ocp-indent merlin org-projectile org-category-capture org-present org-pomodoro alert log4e gntp org-mime org-download htmlize gnuplot wgrep smex ivy-hydra counsel-projectile counsel swiper ivy color-theme-solarized color-theme spinner evil-visualstar evil-visual-mark-mode evil-tutor evil-surround evil-mc evil-matchit evil-lisp-state evil-indent-plus evil-iedit-state iedit evil-exchange evil-ediff evil-args evil-anzu anzu evil undo-tree adaptive-wrap ws-butler winum which-key volatile-highlights vi-tilde-fringe uuidgen use-package toc-org spaceline powerline smartparens restart-emacs request rainbow-delimiters popwin persp-mode pcre2el paradox org-plus-contrib org-bullets open-junk-file neotree move-text macrostep lorem-ipsum linum-relative link-hint indent-guide hydra lv hungry-delete hl-todo highlight-parentheses highlight-numbers parent-mode highlight-indentation helm-themes helm-swoop helm-projectile projectile pkg-info epl helm-mode-manager helm-make helm-flx helm-descbinds helm-ag google-translate golden-ratio flx-ido flx fill-column-indicator fancy-battery eyebrowse expand-region exec-path-from-shell evil-unimpaired evil-search-highlight-persist highlight evil-numbers evil-nerd-commenter evil-escape goto-chg eval-sexp-fu elisp-slime-nav dumb-jump f dash s diminish define-word column-enforce-mode clean-aindent-mode bind-map bind-key auto-highlight-symbol auto-compile packed aggressive-indent ace-window ace-link ace-jump-helm-line helm avy helm-core popup async)))
+    (yapfify pyvenv pytest pyenv-mode py-isort pip-requirements live-py-mode hy-mode dash-functional cython-mode anaconda-mode pythonic jinja2-mode ansible-doc ansible yaml-mode utop tuareg caml ocp-indent merlin org-projectile org-category-capture org-present org-pomodoro alert log4e gntp org-mime org-download htmlize gnuplot wgrep smex ivy-hydra counsel-projectile counsel swiper ivy color-theme-solarized color-theme spinner evil-visualstar evil-visual-mark-mode evil-tutor evil-surround evil-mc evil-matchit evil-lisp-state evil-indent-plus evil-iedit-state iedit evil-exchange evil-ediff evil-args evil-anzu anzu evil undo-tree adaptive-wrap ws-butler winum which-key volatile-highlights vi-tilde-fringe uuidgen use-package toc-org spaceline powerline smartparens restart-emacs request rainbow-delimiters popwin persp-mode pcre2el paradox org-plus-contrib org-bullets open-junk-file neotree move-text macrostep lorem-ipsum linum-relative link-hint indent-guide hydra lv hungry-delete hl-todo highlight-parentheses highlight-numbers parent-mode highlight-indentation helm-themes helm-swoop helm-projectile projectile pkg-info epl helm-mode-manager helm-make helm-flx helm-descbinds helm-ag google-translate golden-ratio flx-ido flx fill-column-indicator fancy-battery eyebrowse expand-region exec-path-from-shell evil-unimpaired evil-search-highlight-persist highlight evil-numbers evil-nerd-commenter evil-escape goto-chg eval-sexp-fu elisp-slime-nav dumb-jump f dash s diminish define-word column-enforce-mode clean-aindent-mode bind-map bind-key auto-highlight-symbol auto-compile packed aggressive-indent ace-window ace-link ace-jump-helm-line helm avy helm-core popup async)))
  '(solarized-bold nil))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
@@ -454,4 +477,7 @@ through to the underlying function"
  '(org-level-6 ((t (:foreground "Aquamarine"))))
  '(org-level-7 ((t (:foreground "LightSteelBlue"))))
  '(org-level-8 ((t (:foreground "LightSalmon"))))
- '(tuareg-font-lock-governing-face ((t (:weight bold :foreground "#d33682")))))
+ '(tuareg-font-lock-governing-face ((t (:weight bold :foreground "#d33682"))))
+ '(whitespace-newline ((t (:inherit shadow :foreground "black" :slant normal))))
+ '(whitespace-space ((t (:foreground "black"))))
+ '(whitespace-tab ((t (:foreground "black")))))
