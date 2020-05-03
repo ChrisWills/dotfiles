@@ -34,7 +34,7 @@ values."
      python
      ansible
      yaml
-     ocaml
+     ;;ocaml
      ;; ----------------------------------------------------------------
      ;; Example of useful layers you may want to use right away.
      ;; Uncomment some layer names and press <SPC f e R> (Vim style) or
@@ -315,6 +315,15 @@ This is the place where most of your configurations should be done. Unless it is
 explicitly specified that a variable should be set before a package is loaded,
 you should place your code here."
 
+;;  (add-hook 'whitespace-mode-hook
+;;    (set-face-attribute 'whitespace-space nil :foreground "black")
+;;    )
+
+(add-hook 'whitespace-mode-hook
+          (lambda ()
+            (set-face-attribute
+             'whitespace-space nil :foreground "black")))
+
 (setq whitespace-display-mappings
       '(
         (space-mark   ?\     [?·]     [?.])		; space - middle dot
@@ -358,7 +367,16 @@ through to the underlying function"
       "a o c" #'org-capture
       "a o a" #'org-agenda)
 (setq org-todo-keywords
-        '((sequence "NEXT(n!)" "TODO(t!)" "PROJ(p@\|)" "WAIT(w@\|)" "DPND(x@)" "DFER(r@)" "|" "DONE(d!)" "CNCL(c@)")))
+        '((sequence
+           "NEXT(n!)"
+           "TODO(t!)"
+           "PROJ(p@\|)"
+           "WAIT(w@\|)"
+           "DPND(x@)"
+           "DFER(r@)"
+           "|"
+           "DONE(d!)"
+           "CNCL(c@)")))
   (setq org-todo-keyword-faces
         '(
           ("NEXT" . (:weight bold :foreground "Pink"))
@@ -373,14 +391,17 @@ through to the underlying function"
            (file+headline "~/org/lists.org" "Inbox") "* NEXT %?\n  captured: %U"
            :empty-lines 1)
           ("N" "Next Action with Gmail Id" entry
-           (file+headline "~/org/capture.org" "Inbox") "* NEXT %?\n  captured: %U\n  [[gmail:%^{gmail id}][%\\1]]"
+           (file+headline "~/org/capture.org" "Inbox")
+           "* NEXT %?\n  captured: %U\n  [[gmail:%^{gmail id}][%\\1]]"
            :empty-lines 1)
           ("c" "Conversation memo" entry
            (file "~/org/conversations.org") "* %U\n %?"
 	         :empty-lines 1)
-          ("p" "Protocol" entry (file+headline "~/org/lists.org" "Captured from org-protocol")
+          ("p" "Protocol"
+           entry (file+headline "~/org/lists.org" "Captured from org-protocol")
            "* %a\nCaptured On: %U\nWebsite: %l\n\n%i\n%?")
-          ("l" "Protocol Link" entry (file+headline "~/org/lists.org" "Captured from org-protocol")
+          ("l" "Protocol Link"
+           entry (file+headline "~/org/lists.org" "Captured from org-protocol")
            "* %? [[%:link][%:description]] \nCaptured On: %U")))
   (setq org-link-abbrev-alist
         '(("gmail" . "https://mail.google.com/mail/u/0/#all/%s")
@@ -401,13 +422,13 @@ through to the underlying function"
            :base-directory "~/org/projects/ragefurnace.org/principles"
            :base-extension "org"
            :publishing-directory "~/public_html/ragefurnace.org/principles"
-           :recursive t 
+           :recursive t
            :publishing-function org-html-publish-to-html)
           ("ragefurnace-org-blog"
            :base-directory "~/org/projects/ragefurnace.org/blog/"
            :base-extension "org"
            :publishing-directory  "~/public_html/ragefurnace.org/blog"
-           :recursive t 
+           :recursive t
            :html-extension "html"
            :headline-levels 4
            ;;:publishing-function org-twbs-publish-to-html)
@@ -424,23 +445,26 @@ through to the underlying function"
 (org-babel-do-load-languages
    'org-babel-load-languages
    '((python . t)
-     (shell . t)))
+     (shell . t))))
 
-    )
   (setq theming-modifications
-      '((solarized
-         (helm-selection :foreground "white" :background "red" :inverse-video nil)
-         ;; See comment above about dotspacemacs-colorize-cursor-according-to-state.
-         (cursor :background "#b58900")
-         (org-level-1 :foreground "LightSkyBlue")
-         (org-level-2 :foreground "LightGoldenrod")
-         (org-level-3 :foreground "Cyan1")
-         (org-level-4 :foreground "chocolate1")
-         (org-level-5 :foreground "PaleGreen")
-         (org-level-6 :foreground "Aquamarine")
-         (org-level-7 :foreground "LightSteelBlue")
-         (org-level-8 :foreground "LightSalmon")
-       )))
+        '((solarized
+           (helm-selection
+            :foreground "white"
+            :background "red"
+            :inverse-video nil)
+           ;; See comment above about dotspacemacs-colorize-cursor-according-to-state.
+           (cursor :background "#b58900")
+           (org-level-1 :foreground "LightSkyBlue")
+           (org-level-2 :foreground "LightGoldenrod")
+           (org-level-3 :foreground "Cyan1")
+           (org-level-4 :foreground "chocolate1")
+           (org-level-5 :foreground "PaleGreen")
+           (org-level-6 :foreground "Aquamarine")
+           (org-level-7 :foreground "LightSteelBlue")
+           (org-level-8 :foreground "LightSalmon")
+           (whitespace-space :foreground "black")
+           )))
 
   (xterm-mouse-mode -1)
   (set-terminal-parameter nil 'background-mode 'dark)
@@ -456,7 +480,14 @@ through to the underlying function"
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(ansi-color-names-vector
-   ["#080808" "#d70000" "#67b11d" "#875f00" "#268bd2" "#af00df" "#00ffff" "#b2b2b2"])
+   ["#080808"
+    "#d70000"
+    "#67b11d"
+    "#875f00"
+    "#268bd2"
+    "#af00df"
+    "#00ffff"
+    "#b2b2b2"])
  '(evil-want-Y-yank-to-eol nil)
  '(package-selected-packages
    (quote
@@ -468,7 +499,8 @@ through to the underlying function"
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(cursor ((t (:background "#b58900"))))
- '(helm-selection ((t (:foreground "white" :background "red" :inverse-video nil))))
+ '(helm-selection
+   ((t (:foreground "white" :background "red" :inverse-video nil))))
  '(org-level-1 ((t (:foreground "LightSkyBlue"))))
  '(org-level-2 ((t (:foreground "LightGoldenrod"))))
  '(org-level-3 ((t (:foreground "Cyan1"))))
