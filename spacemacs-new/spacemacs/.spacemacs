@@ -318,6 +318,9 @@ you should place your code here."
 ;;  (add-hook 'whitespace-mode-hook
 ;;    (set-face-attribute 'whitespace-space nil :foreground "black")
 ;;    )
+(global-display-line-numbers-mode)
+(global-whitespace-mode)
+
 
 (add-hook 'whitespace-mode-hook
           (lambda ()
@@ -326,7 +329,8 @@ you should place your code here."
 
 (setq whitespace-display-mappings
       '(
-        (space-mark   ?\     [?·]     [?.])		; space - middle dot
+        ;(space-mark   ?\     [?·]     [?.])		; space - middle dot
+        (space-mark   ?\     [? ]     [?.])		; space - middle dot
         (space-mark   ?\xA0  [?¤]     [?_])		; hard space - currency sign
         ;; NEWLINE is displayed using the face `whitespace-newline'
         ;;(newline-mark ?\n    [?$ ?\n])			; eol - dollar sign
@@ -470,6 +474,8 @@ through to the underlying function"
   (set-terminal-parameter nil 'background-mode 'dark)
   (set-frame-parameter nil 'background-mode 'dark)
   (spacemacs/load-theme 'solarized)
+
+
   )
 
 ;; Do not write anything past this comment. This is where Emacs will
@@ -480,27 +486,48 @@ through to the underlying function"
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(ansi-color-names-vector
-   ["#080808"
-    "#d70000"
-    "#67b11d"
-    "#875f00"
-    "#268bd2"
-    "#af00df"
-    "#00ffff"
-    "#b2b2b2"])
+   ["#080808" "#d70000" "#67b11d" "#875f00" "#268bd2" "#af00df" "#00ffff" "#b2b2b2"])
+ '(display-line-numbers-current-absolute nil)
+ '(display-line-numbers-type (quote relative))
  '(evil-want-Y-yank-to-eol nil)
+ '(global-whitespace-mode t)
+ '(ivy-initial-inputs-alist
+   (quote
+    ((counsel-minor . "^+")
+     (counsel-package . "^+")
+     (counsel-org-capture . "^")
+     (counsel-M-x . "^")
+     (counsel-describe-symbol . "^")
+     (counsel-describe-function . "^")
+     (counsel-describe-variable . "^")
+     (org-refile . "^")
+     (org-agenda-refile . "^")
+     (org-capture-refile . "^")
+     (Man-completion-table . "^")
+     (woman . "^"))))
  '(package-selected-packages
    (quote
     (yapfify pyvenv pytest pyenv-mode py-isort pip-requirements live-py-mode hy-mode dash-functional cython-mode anaconda-mode pythonic jinja2-mode ansible-doc ansible yaml-mode utop tuareg caml ocp-indent merlin org-projectile org-category-capture org-present org-pomodoro alert log4e gntp org-mime org-download htmlize gnuplot wgrep smex ivy-hydra counsel-projectile counsel swiper ivy color-theme-solarized color-theme spinner evil-visualstar evil-visual-mark-mode evil-tutor evil-surround evil-mc evil-matchit evil-lisp-state evil-indent-plus evil-iedit-state iedit evil-exchange evil-ediff evil-args evil-anzu anzu evil undo-tree adaptive-wrap ws-butler winum which-key volatile-highlights vi-tilde-fringe uuidgen use-package toc-org spaceline powerline smartparens restart-emacs request rainbow-delimiters popwin persp-mode pcre2el paradox org-plus-contrib org-bullets open-junk-file neotree move-text macrostep lorem-ipsum linum-relative link-hint indent-guide hydra lv hungry-delete hl-todo highlight-parentheses highlight-numbers parent-mode highlight-indentation helm-themes helm-swoop helm-projectile projectile pkg-info epl helm-mode-manager helm-make helm-flx helm-descbinds helm-ag google-translate golden-ratio flx-ido flx fill-column-indicator fancy-battery eyebrowse expand-region exec-path-from-shell evil-unimpaired evil-search-highlight-persist highlight evil-numbers evil-nerd-commenter evil-escape goto-chg eval-sexp-fu elisp-slime-nav dumb-jump f dash s diminish define-word column-enforce-mode clean-aindent-mode bind-map bind-key auto-highlight-symbol auto-compile packed aggressive-indent ace-window ace-link ace-jump-helm-line helm avy helm-core popup async)))
- '(solarized-bold nil))
+ '(solarized-bold nil)
+ '(whitespace-style
+   (quote
+    (face trailing tabs spaces newline empty indentation space-after-tab space-before-tab space-mark tab-mark newline-mark))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
+ '(counsel-active-mode ((t (:foreground "blue"))))
+ '(counsel-key-binding ((t (:foreground "magenta"))))
  '(cursor ((t (:background "#b58900"))))
- '(helm-selection
-   ((t (:foreground "white" :background "red" :inverse-video nil))))
+ '(helm-selection ((t (:foreground "white" :background "red" :inverse-video nil))))
+ '(ivy-confirm-face ((t (:inherit minibuffer-prompt :foreground "green"))))
+ '(ivy-current-match ((t (:background "black" :foreground "brightmagenta" :weight bold))))
+ '(ivy-match-required-face ((t (:inherit minibuffer-prompt :foreground "red"))))
+ '(ivy-minibuffer-match-face-2 ((t (:foreground "green" :weight bold))))
+ '(ivy-minibuffer-match-face-3 ((t (:foreground "brightred" :weight bold))))
+ '(ivy-minibuffer-match-face-4 ((t (:foreground "blue" :weight bold))))
+ '(linum-relative-current-face ((t (:inherit linum))))
  '(org-level-1 ((t (:foreground "LightSkyBlue"))))
  '(org-level-2 ((t (:foreground "LightGoldenrod"))))
  '(org-level-3 ((t (:foreground "Cyan1"))))
@@ -509,6 +536,10 @@ through to the underlying function"
  '(org-level-6 ((t (:foreground "Aquamarine"))))
  '(org-level-7 ((t (:foreground "LightSteelBlue"))))
  '(org-level-8 ((t (:foreground "LightSalmon"))))
+ '(swiper-background-match-face-2 ((t (:inherit match))))
+ '(swiper-background-match-face-3 ((t (:inherit isearch))))
+ '(swiper-match-face-2 ((t (:inherit match))))
+ '(swiper-match-face-3 ((t (:inherit isearch))))
  '(tuareg-font-lock-governing-face ((t (:weight bold :foreground "#d33682"))))
  '(whitespace-newline ((t (:inherit shadow :foreground "black" :slant normal))))
  '(whitespace-space ((t (:foreground "black"))))

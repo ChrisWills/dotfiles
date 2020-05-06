@@ -21,11 +21,13 @@ XTerm*VT100.Translations: #override \
 XTerm*termName:         xterm-256color
 XTerm*faceName:         Dejavu Sans Mono
 !XTerm*faceName:         Inconsolata Medium
+!XTerm*faceName:          "Noto Color Emoji:style=Regular:pixelsize=24"
 XTerm*faceSize:         14 
 XTerm*BorderWidth:      0
 XTerm*allowTitleOps:    true 
 XTerm*metaSendsEscape:  true
-XTerm*colorBDMode:      true
+XTerm*boldColors:	false
+XTerm*colorBDMode:      false 
 XTerm*cursorBlink:      true
 XTerm*veryBoldColors:   14
 XTerm*loginShell:       true
@@ -89,10 +91,15 @@ XTerm*color14:               S_base1
 XTerm*color7:                S_base2
 XTerm*color15:               S_base3
 
+!URxvt*font: 
+
+
 .*allowWindowOps: true
 .*font: monospace:size=14
+!.*font: Inconsolata Medium:size=14
 .*termName:         xterm-256color
-.*faceName:         Dejavu Sans Mono
+!.*faceName:         Dejavu Sans Mono
+*faceName:         Inconsolata Medium
 .*faceSize:         14 
 .*BorderWidth:      0
 .*allowTitleOps:    true 
