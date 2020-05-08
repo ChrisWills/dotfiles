@@ -55,6 +55,7 @@ values."
      ;; spell-checking
      ;; syntax-checking
      ;; version-control
+     gtags
      )
    ;; List of additional packages that will be installed without being
    ;; wrapped in a layer. If you need some configuration for these
@@ -321,6 +322,22 @@ you should place your code here."
 (global-display-line-numbers-mode)
 (global-whitespace-mode)
 
+(setq ggtags-mode-line-project-name '("["
+                                      (:eval
+                                       (let
+                                           ((name
+                                             (if
+                                                 (stringp ggtags-project-root)
+                                                 (file-name-nondirectory
+                                                  (directory-file-name ggtags-project-root))
+                                               "?")))
+                                         (propertize name 'face 'mouse-face 'help-echo
+                                                     (if
+                                                         (stringp ggtags-project-root)
+                                                         (concat "mouse-1 to visit " ggtags-project-root)
+                                                       "mouse-1 to set project")
+                                                     'mouse-face 'mode-line-highlight 'keymap ggtags-mode-line-project-keymap)))
+                                      "]"))
 
 (add-hook 'whitespace-mode-hook
           (lambda ()
@@ -364,6 +381,8 @@ through to the underlying function"
 
   (spacemacs/set-leader-keys
     "a g r" #'cw/counsel-rg-prompt-dir)
+
+  (add-hook 'org-mode-hook 'auto-fill-mode)
 
   (with-eval-after-load 'org
     (require 'org-tempo)
@@ -496,7 +515,6 @@ through to the underlying function"
     ((counsel-minor . "^+")
      (counsel-package . "^+")
      (counsel-org-capture . "^")
-     (counsel-M-x . "^")
      (counsel-describe-symbol . "^")
      (counsel-describe-function . "^")
      (counsel-describe-variable . "^")
@@ -507,8 +525,9 @@ through to the underlying function"
      (woman . "^"))))
  '(package-selected-packages
    (quote
-    (yapfify pyvenv pytest pyenv-mode py-isort pip-requirements live-py-mode hy-mode dash-functional cython-mode anaconda-mode pythonic jinja2-mode ansible-doc ansible yaml-mode utop tuareg caml ocp-indent merlin org-projectile org-category-capture org-present org-pomodoro alert log4e gntp org-mime org-download htmlize gnuplot wgrep smex ivy-hydra counsel-projectile counsel swiper ivy color-theme-solarized color-theme spinner evil-visualstar evil-visual-mark-mode evil-tutor evil-surround evil-mc evil-matchit evil-lisp-state evil-indent-plus evil-iedit-state iedit evil-exchange evil-ediff evil-args evil-anzu anzu evil undo-tree adaptive-wrap ws-butler winum which-key volatile-highlights vi-tilde-fringe uuidgen use-package toc-org spaceline powerline smartparens restart-emacs request rainbow-delimiters popwin persp-mode pcre2el paradox org-plus-contrib org-bullets open-junk-file neotree move-text macrostep lorem-ipsum linum-relative link-hint indent-guide hydra lv hungry-delete hl-todo highlight-parentheses highlight-numbers parent-mode highlight-indentation helm-themes helm-swoop helm-projectile projectile pkg-info epl helm-mode-manager helm-make helm-flx helm-descbinds helm-ag google-translate golden-ratio flx-ido flx fill-column-indicator fancy-battery eyebrowse expand-region exec-path-from-shell evil-unimpaired evil-search-highlight-persist highlight evil-numbers evil-nerd-commenter evil-escape goto-chg eval-sexp-fu elisp-slime-nav dumb-jump f dash s diminish define-word column-enforce-mode clean-aindent-mode bind-map bind-key auto-highlight-symbol auto-compile packed aggressive-indent ace-window ace-link ace-jump-helm-line helm avy helm-core popup async)))
+    (ggtags yapfify pyvenv pytest pyenv-mode py-isort pip-requirements live-py-mode hy-mode dash-functional cython-mode anaconda-mode pythonic jinja2-mode ansible-doc ansible yaml-mode utop tuareg caml ocp-indent merlin org-projectile org-category-capture org-present org-pomodoro alert log4e gntp org-mime org-download htmlize gnuplot wgrep smex ivy-hydra counsel-projectile counsel swiper ivy color-theme-solarized color-theme spinner evil-visualstar evil-visual-mark-mode evil-tutor evil-surround evil-mc evil-matchit evil-lisp-state evil-indent-plus evil-iedit-state iedit evil-exchange evil-ediff evil-args evil-anzu anzu evil undo-tree adaptive-wrap ws-butler winum which-key volatile-highlights vi-tilde-fringe uuidgen use-package toc-org spaceline powerline smartparens restart-emacs request rainbow-delimiters popwin persp-mode pcre2el paradox org-plus-contrib org-bullets open-junk-file neotree move-text macrostep lorem-ipsum linum-relative link-hint indent-guide hydra lv hungry-delete hl-todo highlight-parentheses highlight-numbers parent-mode highlight-indentation helm-themes helm-swoop helm-projectile projectile pkg-info epl helm-mode-manager helm-make helm-flx helm-descbinds helm-ag google-translate golden-ratio flx-ido flx fill-column-indicator fancy-battery eyebrowse expand-region exec-path-from-shell evil-unimpaired evil-search-highlight-persist highlight evil-numbers evil-nerd-commenter evil-escape goto-chg eval-sexp-fu elisp-slime-nav dumb-jump f dash s diminish define-word column-enforce-mode clean-aindent-mode bind-map bind-key auto-highlight-symbol auto-compile packed aggressive-indent ace-window ace-link ace-jump-helm-line helm avy helm-core popup async)))
  '(solarized-bold nil)
+ '(vc-follow-symlinks t)
  '(whitespace-style
    (quote
     (face trailing tabs spaces newline empty indentation space-after-tab space-before-tab space-mark tab-mark newline-mark))))

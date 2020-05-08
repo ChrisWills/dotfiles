@@ -55,6 +55,7 @@ export GPG_TTY
 
 # User specific aliases and functions
 alias emacs='emacs -nw'
+alias ls='ls --color=always'
 # Install Ruby Gems to ~/gems
 export GEM_HOME=$HOME/gems
 export CABAL_HOME=$HOME/.cabal-sandbox/bin/

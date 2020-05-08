@@ -17,7 +17,7 @@ else
 	printf '\ePtmux;\e\033]4;233;rgb:16/16/16\007\e\\'
 fi
 
-PATH=$PATH:$HOME/.local/bin:$HOME/bin:$HOME/node-v9.4.0-linux-x64/bin
+PATH=$HOME/.local/bin:$HOME/bin:$PATH
 
 export PATH
 

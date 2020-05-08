@@ -12,6 +12,8 @@ Xft.hinting:            true
 Xft.rgba:               none 
 ! What degree of hinting to use (hintnone, hintslight, hintmedium, or hintfull)
 Xft.hintstyle: 		hintfull
+Xcursor.theme: default
+!Xcursor.size: 48
 
 XTerm*VT100.Translations: #override \
                  Ctrl Shift <Key>V:    insert-selection(CLIPBOARD) \n\
@@ -92,7 +94,6 @@ XTerm*color7:                S_base2
 XTerm*color15:               S_base3
 
 !URxvt*font: 
-
 
 .*allowWindowOps: true
 .*font: monospace:size=14
