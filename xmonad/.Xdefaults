@@ -25,6 +25,7 @@ XTerm*faceName:         Dejavu Sans Mono
 !XTerm*faceName:         Inconsolata Medium
 !XTerm*faceName:          "Noto Color Emoji:style=Regular:pixelsize=24"
 XTerm*faceSize:         14 
+XTerm*directColor: true
 XTerm*BorderWidth:      0
 XTerm*allowTitleOps:    true 
 XTerm*metaSendsEscape:  true
