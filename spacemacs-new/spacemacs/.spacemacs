@@ -492,6 +492,8 @@ through to the underlying function"
   (xterm-mouse-mode -1)
   (set-terminal-parameter nil 'background-mode 'dark)
   (set-frame-parameter nil 'background-mode 'dark)
+  (setq custom-theme-directory "~/.emacs.d/private/local/themes")
+  (setq custom-theme-load-path '("~/.emacs.d/private/local/themes" custom-theme-directory t))
   (spacemacs/load-theme 'solarized)
 
 
