@@ -139,11 +139,12 @@ values."
    dotspacemacs-colorize-cursor-according-to-state t
    ;; Default font, or prioritized list of fonts. `powerline-scale' allows to
    ;; quickly tweak the mode-line size to make separators look not too crappy.
-   dotspacemacs-default-font '("Source Code Pro"
-                               :size 13
-                               :weight normal
-                               :width normal
-                               :powerline-scale 1.1)
+;;   dotspacemacs-default-font '("Source Code Pro"
+;;                               :size 13
+;;                               :weight normal
+;;                               :width normal
+;;                               :powerline-scale 1.1)
+   dotspacemacs-default-font '("Dejavu Sans Mono" :size 18 :weight medium)
    ;; The leader key
    dotspacemacs-leader-key "SPC"
    ;; The key used for Emacs commands (M-x) (after pressing on the leader key).
@@ -470,28 +471,30 @@ through to the underlying function"
    '((python . t)
      (shell . t))))
 
-  (setq theming-modifications
-        '((solarized
-           (helm-selection
-            :foreground "white"
-            :background "red"
-            :inverse-video nil)
-           ;; See comment above about dotspacemacs-colorize-cursor-according-to-state.
-           (cursor :background "#b58900")
-           (org-level-1 :foreground "LightSkyBlue")
-           (org-level-2 :foreground "LightGoldenrod")
-           (org-level-3 :foreground "Cyan1")
-           (org-level-4 :foreground "chocolate1")
-           (org-level-5 :foreground "PaleGreen")
-           (org-level-6 :foreground "Aquamarine")
-           (org-level-7 :foreground "LightSteelBlue")
-           (org-level-8 :foreground "LightSalmon")
-           (whitespace-space :foreground "black")
-           )))
+;;  (setq theming-modifications
+;;        '((solarized
+;;           (helm-selection
+;;            :foreground "white"
+;;            :background "red"
+;;            :inverse-video nil)
+;;           ;; See comment above about dotspacemacs-colorize-cursor-according-to-state.
+;;           (cursor :background "#b58900")
+;;           (org-level-1 :foreground "LightSkyBlue")
+;;           (org-level-2 :foreground "LightGoldenrod")
+;;           (org-level-3 :foreground "Cyan1")
+;;           (org-level-4 :foreground "chocolate1")
+;;           (org-level-5 :foreground "PaleGreen")
+;;           (org-level-6 :foreground "Aquamarine")
+;;           (org-level-7 :foreground "LightSteelBlue")
+;;           (org-level-8 :foreground "LightSalmon")
+;;           (whitespace-space :foreground "black")
+;;           )))
 
   (xterm-mouse-mode -1)
   (set-terminal-parameter nil 'background-mode 'dark)
   (set-frame-parameter nil 'background-mode 'dark)
+  ;; Theme source lives here https://github.com/sellout/emacs-color-theme-solarized
+  ;; This theme works in the terminal with very minimal customized faces
   (setq custom-theme-directory "~/.emacs.d/private/local/themes")
   (setq custom-theme-load-path '("~/.emacs.d/private/local/themes" custom-theme-directory t))
   (spacemacs/load-theme 'solarized)
@@ -506,8 +509,8 @@ through to the underlying function"
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(ansi-color-names-vector
-   ["#080808" "#d70000" "#67b11d" "#875f00" "#268bd2" "#af00df" "#00ffff" "#b2b2b2"])
+ ;;'(ansi-color-names-vector
+ ;;  ["#080808" "#d70000" "#67b11d" "#875f00" "#268bd2" "#af00df" "#00ffff" "#b2b2b2"])
  '(custom-safe-themes
    (quote
     ("8db4b03b9ae654d4a57804286eb3e332725c84d7cdab38463cb6b97d5762ad26" "4aee8551b53a43a883cb0b7f3255d6859d766b6c5e14bcb01bed572fcbef4328" default)))
@@ -532,7 +535,9 @@ through to the underlying function"
    (quote
     (ggtags yapfify pyvenv pytest pyenv-mode py-isort pip-requirements live-py-mode hy-mode dash-functional cython-mode anaconda-mode pythonic jinja2-mode ansible-doc ansible yaml-mode utop tuareg caml ocp-indent merlin org-projectile org-category-capture org-present org-pomodoro alert log4e gntp org-mime org-download htmlize gnuplot wgrep smex ivy-hydra counsel-projectile counsel swiper ivy color-theme spinner evil-visualstar evil-visual-mark-mode evil-tutor evil-surround evil-mc evil-matchit evil-lisp-state evil-indent-plus evil-iedit-state iedit evil-exchange evil-ediff evil-args evil-anzu anzu evil undo-tree adaptive-wrap ws-butler winum which-key volatile-highlights vi-tilde-fringe uuidgen use-package toc-org spaceline powerline smartparens restart-emacs request rainbow-delimiters popwin persp-mode pcre2el paradox org-plus-contrib org-bullets open-junk-file neotree move-text macrostep lorem-ipsum linum-relative link-hint indent-guide hydra lv hungry-delete hl-todo highlight-parentheses highlight-numbers parent-mode highlight-indentation helm-themes helm-swoop helm-projectile projectile pkg-info epl helm-mode-manager helm-make helm-flx helm-descbinds helm-ag google-translate golden-ratio flx-ido flx fill-column-indicator fancy-battery eyebrowse expand-region exec-path-from-shell evil-unimpaired evil-search-highlight-persist highlight evil-numbers evil-nerd-commenter evil-escape goto-chg eval-sexp-fu elisp-slime-nav dumb-jump f dash s diminish define-word column-enforce-mode clean-aindent-mode bind-map bind-key auto-highlight-symbol auto-compile packed aggressive-indent ace-window ace-link ace-jump-helm-line helm avy helm-core popup async)))
  '(solarized-bold t)
+ '(solarized-degrade nil)
  '(solarized-italic t)
+ '(solarized-termcolors 16)
  '(vc-follow-symlinks t)
  '(whitespace-style
    (quote
@@ -568,6 +573,7 @@ through to the underlying function"
  '(swiper-match-face-2 ((t (:inherit match))))
  '(swiper-match-face-3 ((t (:inherit isearch))))
  '(tuareg-font-lock-governing-face ((t (:weight bold :foreground "#d33682"))))
- '(whitespace-newline ((t (:inherit shadow :foreground "black" :slant normal))))
- '(whitespace-space ((t (:foreground "black"))))
- '(whitespace-tab ((t (:foreground "black")))))
+ '(whitespace-newline ((t (:foreground "black"))))
+ '(whitespace-space ((t (:inherit font-lock-comment-delimiter-face))))
+ '(whitespace-tab ((t (:foreground "black"))))
+ )
