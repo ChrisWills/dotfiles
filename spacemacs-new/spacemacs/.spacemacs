@@ -5,7 +5,7 @@
 (defun dotspacemacs/layers ()
   "Configuration Layers declaration.
 You should not put any user code in this function besides modifying the variable
-values."
+."
   (setq-default
    ;; Base distribution to use. This is a layer contained in the directory
    ;; `+distribution'. For now available distributions are `spacemacs-base'
@@ -61,7 +61,7 @@ values."
    ;; wrapped in a layer. If you need some configuration for these
    ;; packages, then consider creating a layer. You can also put the
    ;; configuration in `dotspacemacs/user-config'.
-   dotspacemacs-additional-packages '(color-theme-solarized)
+   dotspacemacs-additional-packages '()
    ;; A list of packages that cannot be updated.
    dotspacemacs-frozen-packages '()
    ;; A list of packages that will not be installed and loaded.
@@ -506,6 +506,9 @@ through to the underlying function"
  ;; If there is more than one, they won't work right.
  '(ansi-color-names-vector
    ["#080808" "#d70000" "#67b11d" "#875f00" "#268bd2" "#af00df" "#00ffff" "#b2b2b2"])
+ '(custom-safe-themes
+   (quote
+    ("8db4b03b9ae654d4a57804286eb3e332725c84d7cdab38463cb6b97d5762ad26" "4aee8551b53a43a883cb0b7f3255d6859d766b6c5e14bcb01bed572fcbef4328" default)))
  '(display-line-numbers-current-absolute nil)
  '(display-line-numbers-type (quote relative))
  '(evil-want-Y-yank-to-eol nil)
@@ -525,8 +528,9 @@ through to the underlying function"
      (woman . "^"))))
  '(package-selected-packages
    (quote
-    (ggtags yapfify pyvenv pytest pyenv-mode py-isort pip-requirements live-py-mode hy-mode dash-functional cython-mode anaconda-mode pythonic jinja2-mode ansible-doc ansible yaml-mode utop tuareg caml ocp-indent merlin org-projectile org-category-capture org-present org-pomodoro alert log4e gntp org-mime org-download htmlize gnuplot wgrep smex ivy-hydra counsel-projectile counsel swiper ivy color-theme-solarized color-theme spinner evil-visualstar evil-visual-mark-mode evil-tutor evil-surround evil-mc evil-matchit evil-lisp-state evil-indent-plus evil-iedit-state iedit evil-exchange evil-ediff evil-args evil-anzu anzu evil undo-tree adaptive-wrap ws-butler winum which-key volatile-highlights vi-tilde-fringe uuidgen use-package toc-org spaceline powerline smartparens restart-emacs request rainbow-delimiters popwin persp-mode pcre2el paradox org-plus-contrib org-bullets open-junk-file neotree move-text macrostep lorem-ipsum linum-relative link-hint indent-guide hydra lv hungry-delete hl-todo highlight-parentheses highlight-numbers parent-mode highlight-indentation helm-themes helm-swoop helm-projectile projectile pkg-info epl helm-mode-manager helm-make helm-flx helm-descbinds helm-ag google-translate golden-ratio flx-ido flx fill-column-indicator fancy-battery eyebrowse expand-region exec-path-from-shell evil-unimpaired evil-search-highlight-persist highlight evil-numbers evil-nerd-commenter evil-escape goto-chg eval-sexp-fu elisp-slime-nav dumb-jump f dash s diminish define-word column-enforce-mode clean-aindent-mode bind-map bind-key auto-highlight-symbol auto-compile packed aggressive-indent ace-window ace-link ace-jump-helm-line helm avy helm-core popup async)))
- '(solarized-bold nil)
+    (ggtags yapfify pyvenv pytest pyenv-mode py-isort pip-requirements live-py-mode hy-mode dash-functional cython-mode anaconda-mode pythonic jinja2-mode ansible-doc ansible yaml-mode utop tuareg caml ocp-indent merlin org-projectile org-category-capture org-present org-pomodoro alert log4e gntp org-mime org-download htmlize gnuplot wgrep smex ivy-hydra counsel-projectile counsel swiper ivy color-theme spinner evil-visualstar evil-visual-mark-mode evil-tutor evil-surround evil-mc evil-matchit evil-lisp-state evil-indent-plus evil-iedit-state iedit evil-exchange evil-ediff evil-args evil-anzu anzu evil undo-tree adaptive-wrap ws-butler winum which-key volatile-highlights vi-tilde-fringe uuidgen use-package toc-org spaceline powerline smartparens restart-emacs request rainbow-delimiters popwin persp-mode pcre2el paradox org-plus-contrib org-bullets open-junk-file neotree move-text macrostep lorem-ipsum linum-relative link-hint indent-guide hydra lv hungry-delete hl-todo highlight-parentheses highlight-numbers parent-mode highlight-indentation helm-themes helm-swoop helm-projectile projectile pkg-info epl helm-mode-manager helm-make helm-flx helm-descbinds helm-ag google-translate golden-ratio flx-ido flx fill-column-indicator fancy-battery eyebrowse expand-region exec-path-from-shell evil-unimpaired evil-search-highlight-persist highlight evil-numbers evil-nerd-commenter evil-escape goto-chg eval-sexp-fu elisp-slime-nav dumb-jump f dash s diminish define-word column-enforce-mode clean-aindent-mode bind-map bind-key auto-highlight-symbol auto-compile packed aggressive-indent ace-window ace-link ace-jump-helm-line helm avy helm-core popup async)))
+ '(solarized-bold t)
+ '(solarized-italic t)
  '(vc-follow-symlinks t)
  '(whitespace-style
    (quote
@@ -539,6 +543,7 @@ through to the underlying function"
  '(counsel-active-mode ((t (:foreground "blue"))))
  '(counsel-key-binding ((t (:foreground "magenta"))))
  '(cursor ((t (:background "#b58900"))))
+ '(font-lock-comment-face ((t (:background "brightblack" :foreground "brightgreen" :slant italic))))
  '(helm-selection ((t (:foreground "white" :background "red" :inverse-video nil))))
  '(ivy-confirm-face ((t (:inherit minibuffer-prompt :foreground "green"))))
  '(ivy-current-match ((t (:background "black" :foreground "brightmagenta" :weight bold))))
@@ -547,6 +552,7 @@ through to the underlying function"
  '(ivy-minibuffer-match-face-3 ((t (:foreground "brightred" :weight bold))))
  '(ivy-minibuffer-match-face-4 ((t (:foreground "blue" :weight bold))))
  '(linum-relative-current-face ((t (:inherit linum))))
+ '(mode-line-buffer-id ((t (:weight bold))))
  '(org-level-1 ((t (:foreground "LightSkyBlue"))))
  '(org-level-2 ((t (:foreground "LightGoldenrod"))))
  '(org-level-3 ((t (:foreground "Cyan1"))))
