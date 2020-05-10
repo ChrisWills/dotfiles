@@ -58,6 +58,7 @@
 (server-start)
 
 (add-to-list 'load-path "~/.emacs.d/elisp")
+(add-to-list 'load-path "~/.emacs.d/themes")
 
 
 ;; EL-GET
@@ -114,7 +115,10 @@
 
 ;; THEME
 ;;(load-theme 'jbeans t)
-(load-theme 'solarized t)
+;;(load-theme 'solarized t)
+(add-to-list 'custom-theme-load-path "~/.emacs.d/themes")
+;;(load-theme 'gruvbox t)
+
 (add-hook 'after-make-frame-functions
           (lambda (frame)
             (let ((mode (if (display-graphic-p frame) 'dark 'dark)))
@@ -544,6 +548,9 @@ setting the args to `-t TYPE' instead of prompting."
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
+ '(custom-safe-themes
+   (quote
+    ("aded61687237d1dff6325edb492bde536f40b048eab7246c61d5c6643c696b7f" "b89ae2d35d2e18e4286c8be8aaecb41022c1a306070f64a66fd114310ade88aa" default)))
  '(haskell-doc-mode 0)
  '(haskell-process-auto-import-loaded-modules t)
  '(haskell-process-log t)
@@ -558,7 +565,7 @@ setting the args to `-t TYPE' instead of prompting."
  '(solarized-bold nil)
  '(solarized-termcolors 256)
  '(solarized-underline nil)
- '(xterm-extra-capabilities (quote (getSelection setSelection))))
+ '(xterm-extra-capabilities (quote (setSelection))))
 
 (require 'haskell-interactive-mode)
 (require 'haskell-process)

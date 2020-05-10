@@ -133,8 +133,7 @@ values."
    ;; List of themes, the first of the list is loaded when spacemacs starts.
    ;; Press <SPC> T n to cycle to the next theme in the list (works great
    ;; with 2 themes variants, one dark and one light)
-   dotspacemacs-themes '(spacemacs-dark
-                         spacemacs-light)
+   dotspacemacs-themes '(spacemacs-dark spacemacs-light)
    ;; If non nil the cursor color matches the state color in GUI Emacs.
    dotspacemacs-colorize-cursor-according-to-state t
    ;; Default font, or prioritized list of fonts. `powerline-scale' allows to
@@ -320,6 +319,15 @@ you should place your code here."
 ;;  (add-hook 'whitespace-mode-hook
 ;;    (set-face-attribute 'whitespace-space nil :foreground "black")
 ;;    )
+
+  ;; The key to making 
+  (defun cw/get_color_mapping (rgb)
+    (list rgb (car (cdr (tty-color-approximate (color-values rgb))))))
+
+  (defun cw/get_solarized_256_color_palette_indexes ()
+    (mapcar (lambda (s) (message "%s" s))
+            (mapcar (lambda (i) (cw/get_color_mapping (car (cdr i))) ) solarized-colors)))
+
 (global-display-line-numbers-mode)
 (global-whitespace-mode)
 
@@ -550,7 +558,7 @@ through to the underlying function"
  '(counsel-active-mode ((t (:foreground "blue"))))
  '(counsel-key-binding ((t (:foreground "magenta"))))
  '(cursor ((t (:background "#b58900"))))
- '(font-lock-comment-face ((t (:background "brightblack" :foreground "brightgreen" :slant italic))))
+ ;'(font-lock-comment-face ((t (:background "brightblack" :foreground "brightgreen" :slant italic))))
  '(helm-selection ((t (:foreground "white" :background "red" :inverse-video nil))))
  '(ivy-confirm-face ((t (:inherit minibuffer-prompt :foreground "green"))))
  '(ivy-current-match ((t (:background "black" :foreground "brightmagenta" :weight bold))))
