@@ -60,13 +60,13 @@ instance ExtensionClass StartupProgs where
 
 scratchpads :: [NamedScratchpad]
 scratchpads =
-    [ NS "volume" "xterm -title Volume -xrm \"XTerm*allowTitleOps:false\" -e alsamixer" (title =? "Volume") 
+    [ NS "volume" (xtermCmd ++ " -title Volume -xrm \"XTerm*allowTitleOps:false\" -e alsamixer") (title =? "Volume")
          (customFloating $ W.RationalRect 0 (1/48) (1/8) (47/48))
-    , NS "NetworkManager" "xterm -title NetworkManager -xrm \"XTerm*allowTitleOps:false\" -e nmtui connect" (title =? "NetworkManager") 
+    , NS "NetworkManager" (xtermCmd ++ " -title NetworkManager -xrm \"XTerm*allowTitleOps:false\" -e nmtui connect") (title =? "NetworkManager") 
          (customFloating $ W.RationalRect (1/10) (2/10) (8/10) (6/10))
-    , NS "music" "xterm -title Music -xrm \"XTerm*allowTitleOps:false\" -e ncmpc" (title =? "Music")
+    , NS "music" (xtermCmd ++ " -title Music -xrm \"XTerm*allowTitleOps:false\" -e ncmpc") (title =? "Music")
          (customFloating $ W.RationalRect (1/10) (2/10) (8/10) (6/10))
-    , NS "term" "xterm -title Scratchpad -xrm \"XTerm*allowTitleOps:false\"" (title =? "Scratchpad")
+    , NS "term" (xtermCmd ++ " -title Scratchpad -xrm \"XTerm*allowTitleOps:false\"") (title =? "Scratchpad")
          (customFloating $ W.RationalRect (1/10) (2/10) (8/10) (6/10))
     , NS "dict" "artha" (title =? "Artha ~ The Open Thesaurus")
          (customFloating $ W.RationalRect (2/6) (1/6) (2/6) (4/6))] 
@@ -150,6 +150,7 @@ chooseLayoutIcon xmonadDir layoutName =
     "IM Grid"              -> "^i(" ++ xmonadDir ++ "/dzen/grid.xbm)"
     _                      -> layoutName 
 
+
 logHook' :: X ()
 logHook' = do 
   dzenHandle <- getNamedPipe "dzenPipe" 
@@ -157,36 +158,18 @@ logHook' = do
   fadeInactiveLogHook 0xdddddddd
   setWMName "LG3D"
   dynamicLogWithPP
-    $ def { ppCurrent         = dzenColor cyan base03 . pad
-          , ppVisible         = dzenColor cyan colorInvisible . pad
-          , ppHidden          = dzenColor cyan colorInvisible . pad
-          , ppUrgent          = dzenColor colorMedGrey colorYellow
+    $ def { ppCurrent         = dzenColor barCurrent barBg . pad
+          , ppVisible         = dzenColor barVisible colorInvisible . pad
+          , ppHidden          = dzenColor barVisible colorInvisible . pad
+          , ppUrgent          = dzenColor barBg barCurrent 
           , ppHiddenNoWindows = dzenColor colorInvisible colorInvisible . pad
           , ppWsSep           = ""
           , ppSep             = " | "
-          , ppLayout          = dzenColor cyan base02 . (chooseLayoutIcon xmonadDir) 
+          , ppLayout          = dzenColor barVisible barBg . (chooseLayoutIcon xmonadDir) 
           , ppSort            = fmap (.namedScratchpadFilterOutWorkspace) $ ppSort def
-          , ppTitle           = ("" ++) . dzenColor base1 colorInvisible . dzenEscape
+          , ppTitle           = ("" ++) . dzenColor barFg colorInvisible . dzenEscape
           , ppOutput          = maybe (\s -> return ()) hPutStrLn dzenHandle
           }
-
-base03  = "#002b36"
-base02  = "#073642"
-base01  = "#586e75"
-base00  = "#657b83"
-base0   = "#839496"
-base1   = "#93a1a1"
-base2   = "#eee8d5"
-base3   = "#fdf6e3"
-yellow  = "#b58900"
-orange  = "#cb4b16"
-red     = "#dc322f"
-magenta = "#d33682"
-violet  = "#6c71c4"
-blue    = "#268bd2"
-cyan    = "#2aa198"
-green   = "#859900"
-
 
 -- sizes
 gap         = 10
@@ -194,38 +177,90 @@ topbar      = 10
 border      = 0
 prompt      = 20
 status      = 20
+borderWidth'          = 4
 
-myNormalBorderColor     = "#000000"
-myFocusedBorderColor    = active
+-- Solarized dark
+--base03  = "#002b36"
+--base02  = "#073642"
+--base00  = "#657b83"
+--base0 = "#839496"
+--base1   = "#93a1a1"
+--base2   = "#eee8d5"
+--yellow  = "#b58900"
+--red     = "#dc322f"
+--blue    = "#268bd2"
+--cyan    = "#2aa198"
+--
+--colorInvisible        = ""
+--normalBorderColor'    = base03
+--focusedBorderColor'   = yellow
+--barBg = base02
+--barFg = base0 
+--barCurrent = cyan
+--barVisible = cyan
+--tabActiveBg = base02
+--tabActiveFg = base0
+--tabInactiveBg = base03
+--tabInactiveFg = base0
+--tabActiveBorder = tabActiveBg 
+--tabInactiveBorder = tabInactiveBg 
+--xtermCmd = "xterm -class XTermSolarized"
 
-active      = blue
-activeWarn  = red
-inactive    = base02
-focusColor  = blue
-unfocusColor = base02
+-- gruvbox dark 
+black0 = "#282828"
+black0s = "#32302f"
+black01 = "#3c3836"
+black02 = "#504945"
+black1 = "#928374"
+red0 = "#cc241d"
+red1 = "#fb4934"
+green0 = "#98971a"
+green1 = "#b8bb26"
+yellow0 = "#d79921"
+yellow1 = "#fabd2f"
+blue0 = "#458588"
+blue1 = "#83a598"
+violet0 = "#b16286"
+violet1 = "#d3869b"
+cyan0 = "#689d6a"
+cyan1 = "#8ec07c"
+white0 = "#a89984"
+white1 = "#ebdbb2"
 
-topBarTheme = def
-    { fontName              = barXFont
-    , inactiveBorderColor   = base03
-    , inactiveColor         = base03
-    , inactiveTextColor     = base03
-    , activeBorderColor     = active
-    , activeColor           = active
-    , activeTextColor       = active
-    , urgentBorderColor     = red
-    , urgentTextColor       = yellow
-    , decoHeight            = topbar
-    }
+colorInvisible = ""
+normalBorderColor' = black0s
+focusedBorderColor' = yellow1
+barBg = black0
+barFg = white0
+barCurrent = yellow1
+barVisible = yellow0
+tabActiveBg = black02  
+tabActiveFg = white1
+tabInactiveBg = black01
+tabInactiveFg = white1 
+tabActiveBorder = tabActiveBg 
+tabInactiveBorder = tabInactiveBg 
+xtermCmd = "xterm -class XTermGruvboxDark"
 
 myTabTheme = def
   { fontName              = barXFont
-  , activeColor           = active
-  , inactiveColor         = base02
-  , activeBorderColor     = active
-  , inactiveBorderColor   = base02
-  , activeTextColor       = base03
-  , inactiveTextColor     = base00
-  }
+  , activeColor           = tabActiveBg
+  , inactiveColor         = tabInactiveBg
+  , activeBorderColor     = tabActiveBorder
+  , inactiveBorderColor   = tabInactiveBorder
+  , activeTextColor       = tabActiveFg
+  , inactiveTextColor     = tabInactiveFg }
+
+-- Run Dialog Theme
+myPromptConfig = def
+  { font                  = xftFont
+  , bgColor               = barBg
+  , fgColor               = barFg
+  , bgHLight              = barCurrent 
+  , fgHLight              = barBg
+  , promptBorderWidth     = 0
+  , height                = 20
+  , historyFilter         = deleteConsecutive }
 
 layoutHook' = tabs
               ||| flexTiled 
@@ -262,41 +297,11 @@ layoutHook' = tabs
       $ noBorders Full 
 
   --- 
-  -- color names are easier to remember:
-colorInvisible        = ""
-colorOrange           = "#ff7701"
-colorDarkGrey         = "#161616"
-colorMedGrey          = "#444444"
-colorPink             = "#e3008d"
-colorGreen            = "#00aa4a"
-colorBlue             = "#008dd5"
-colorYellow           = "#ebac54"
---colorWhite            = "#cfbfad"
-colorWhite            = "#ffffff"
-colorLightBlue        = "#afdfff"
-colorDarkGrey2        = "#262626"
-colorLightGrey        = "#a6a6a6"
---normalBorderColor'    = "#262626"
---focusedBorderColor'   = "#9F6C3B"
-normalBorderColor'    = base03 
-focusedBorderColor'   = yellow 
-borderWidth'          = 4
 
---barFont  = "Sauce Code Powerline:size=9"
 barFont  = "DejaVu Sans Mono Book:size=10"
 barXFont = "inconsolata:size=14"
 xftFont  = "xft:Sauce Code Powerline:pixelsize=18"
 
-mXPConfig =
-    def
-        { font                  = xftFont
-        , bgColor               = base02 
-        , fgColor               = base1 
-        , bgHLight              = yellow 
-        , fgHLight              = base02 
-        , promptBorderWidth     = 0
-        , height                = 20
-        , historyFilter         = deleteConsecutive }
 
 isFloatDo f1 f2 w s = if (M.member w (W.floating s)) then f1 w else f2 w
 
@@ -328,9 +333,9 @@ dirs           = [ D,  U,  L,  R ]
 myKeymap :: [(String, X ())] 
 myKeymap = 
   [   ("M-<Return>", spawn $ XMonad.terminal myConfig)
-  ,   ("M-p", spawn "xterm")
-  ,   ("M-r", shellPrompt mXPConfig)
-  ,   ("M-S-r", xmonadPromptC pcmds mXPConfig)
+  ,   ("M-p", spawn xtermCmd)
+  ,   ("M-r", shellPrompt myPromptConfig)
+  ,   ("M-S-r", xmonadPromptC pcmds myPromptConfig)
   ,   ("M-S-c", kill)
   ,   ("M-<Space>", sendMessage NextLayout)
   ,   ("M-S-<Space>", asks config >>= \c -> setLayout (XMonad.layoutHook c))
@@ -394,12 +399,13 @@ getDefaultScreenWidth = withDisplay $ \dpy ->
     return $ displayWidth dpy $ defaultScreen dpy
 
 -- | Run this as a namedPipe so that we can update it with loghook
+
+
 myStatusBar :: CInt -> String 
 myStatusBar screenWidth =
   "dzen2 -x 0 -y '0' -h '16' -w "
   ++ show (screenWidth - 326)
---  ++ " -ta 'l' -fg '#FFFFFF' -bg '#161616' -fn "
-  ++ " -ta 'l' -fg '#839496' -bg '#073642' -fn "
+  ++ " -ta 'l' -fg '" ++ barFg ++ "' -bg '" ++ barBg ++ "' -fn "
   ++ (show barFont) 
 
 -- | These stay running during an xmonad session. We save the pids so we can kill these on shutdown/restart
@@ -407,14 +413,13 @@ startupApps :: CInt -> [String]
 startupApps screenWidth =
      ["while true; do date +'%a %b %d %l:%M%p'; sleep 30; done | dzen2 -x "
       ++ show (screenWidth - 136)
---      ++" -y '0' -h '16' -w '136' -ta 'c' -fg '#FFFFFF' -bg '#161616' -fn "
-      ++" -y '0' -h '16' -w '136' -ta 'c' -fg '#839496' -bg '#073642' -fn "
+      ++" -y '0' -h '16' -w '136' -ta 'c' -fg '" ++ barFg ++ "' -bg '" ++ barBg ++ "' -fn "
       ++ (show barFont) 
      ,"stalonetray --geometry 12x1+"
        ++ show (screenWidth - 326)
        ++"+0 --max-geometry 12x1+"
        ++ show (screenWidth - 326)
-       ++"+0 --background '#073642' --icon-size 16 --icon-gravity NE --kludges=force_icons_size" 
+       ++"+0 --background '" ++ barBg ++ "' --icon-size 16 --icon-gravity NE --kludges=force_icons_size" 
      ,"batt_stat.exe"
      ,"nm-applet"
      ,"xscreensaver"]
@@ -425,10 +430,8 @@ startupCmds xmonadDir =
     ["xset r rate 200 60"
     ,"xrdb -load .Xdefaults"
     ,"xmodmap " ++ xmonadDir ++ "/.Xmodmap"
-    ,"convert -size 1600x900 xc:black " ++ xmonadDir ++ "/.wallpaper.png"
     ,"xbacklight -set 70"
     ,"nm-applet"
-    --,"feh --bg-fill " ++ xmonadDir ++ "/.wallpaper.png"
     ,"xsetroot -bg black"
     ,"xfce4-power-manager"
     ,"syncthing-gtk -m"]
@@ -444,7 +447,7 @@ startupHook' = do
     XS.put (StartupProgs appPids)
     setWMName "LG3D"
     spawnOn "1" "firefox"
-    spawnOn "2" "xterm -e '/home/cwills/.xmonad/tmux-dev.sh'" 
+    spawnOn "2" (xtermCmd ++ " -e '/home/cwills/.xmonad/tmux-dev.sh'")
     -- spawnOn "12" "pidgin"
 
 cleanupHook :: X ()
@@ -456,7 +459,7 @@ cleanupHook = do
 
 myConfig =
   def
-  { terminal            = "xterm -e 'tmux -2'"
+  { terminal            = xtermCmd ++ " -e 'tmux -2'"
   , workspaces          = map show [1 .. 15] ++ ["NSP"]
   , modMask             = mod4Mask -- alt and windows key are swapped with xmodmap in startup hook
   , keys                = \c -> mkKeymap c myKeymap

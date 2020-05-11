@@ -1,0 +1,29 @@
+
+*VT100.Translations: #override \
+                 Ctrl Shift <Key>V:    insert-selection(CLIPBOARD) \n\
+                 Ctrl Shift <Key>C:    copy-selection(CLIPBOARD)
+
+! XTerm Config
+!*termName:         xterm-256color
+*termName:         xterm-24bit
+*faceName:         Dejavu Sans Mono
+!XTerm*faceName:         Inconsolata Medium
+!XTerm*faceName:          "Noto Color Emoji:style=Regular:pixelsize=24"
+*faceSize:         14 
+*directColor: 	True
+*BorderWidth:      0
+*allowTitleOps:    True
+*metaSendsEscape:  True
+*boldColors:	False
+*colorBDMode:      False
+*cursorBlink:      True
+*veryBoldColors:   14
+*loginShell:       True
+*charClass:        33:48,35:48,37:48,43:48,45-47:48,64:48,95:48,126:48,35:48,58:48
+*jumpScroll:       True
+*multiScroll:      True
+*boldMode:         True
+*saveLines:        512
+*scrollBar:        False
+*bellIsUrgent:	True
+*allowWindowOps: True

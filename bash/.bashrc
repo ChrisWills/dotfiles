@@ -49,6 +49,8 @@ function spacemacs {
 	HOME=/home/cwills/spacemacs emacs -nw --insecure
 }
 
+XAPPLRESDIR=/home/cwills/app-defaults/
+export XAPPLRESDIR
 GPG_TTY=$(tty)
 export GPG_TTY
 ### GPG SETUP END ###

@@ -31,6 +31,7 @@ You should not put any user code in this function besides modifying the variable
    ;; List of configuration layers to load.
    dotspacemacs-configuration-layers
    '(
+     haskell
      python
      ansible
      yaml
@@ -61,7 +62,7 @@ You should not put any user code in this function besides modifying the variable
    ;; wrapped in a layer. If you need some configuration for these
    ;; packages, then consider creating a layer. You can also put the
    ;; configuration in `dotspacemacs/user-config'.
-   dotspacemacs-additional-packages '()
+   dotspacemacs-additional-packages '(gruvbox-theme)
    ;; A list of packages that cannot be updated.
    dotspacemacs-frozen-packages '()
    ;; A list of packages that will not be installed and loaded.
@@ -320,7 +321,7 @@ you should place your code here."
 ;;    (set-face-attribute 'whitespace-space nil :foreground "black")
 ;;    )
 
-  ;; The key to making 
+  ;; The key to making
   (defun cw/get_color_mapping (rgb)
     (list rgb (car (cdr (tty-color-approximate (color-values rgb))))))
 
@@ -505,7 +506,9 @@ through to the underlying function"
   ;; This theme works in the terminal with very minimal customized faces
   (setq custom-theme-directory "~/.emacs.d/private/local/themes")
   (setq custom-theme-load-path '("~/.emacs.d/private/local/themes" custom-theme-directory t))
-  (spacemacs/load-theme 'solarized)
+  ;;(spacemacs/load-theme 'solarized nil)
+  ;;(load-theme 'solarized-dark t)
+  (load-theme 'gruvbox-dark-soft t)
 
 
   )
@@ -517,15 +520,15 @@ through to the underlying function"
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- ;;'(ansi-color-names-vector
- ;;  ["#080808" "#d70000" "#67b11d" "#875f00" "#268bd2" "#af00df" "#00ffff" "#b2b2b2"])
+ '(ansi-color-names-vector
+   ["#080808" "#d70000" "#67b11d" "#875f00" "#268bd2" "#af00df" "#00ffff" "#b2b2b2"])
  '(custom-safe-themes
    (quote
-    ("8db4b03b9ae654d4a57804286eb3e332725c84d7cdab38463cb6b97d5762ad26" "4aee8551b53a43a883cb0b7f3255d6859d766b6c5e14bcb01bed572fcbef4328" default)))
+    ("b89ae2d35d2e18e4286c8be8aaecb41022c1a306070f64a66fd114310ade88aa" "bffa9739ce0752a37d9b1eee78fc00ba159748f50dc328af4be661484848e476" "4cf9ed30ea575fb0ca3cff6ef34b1b87192965245776afa9e9e20c17d115f3fb" "aded61687237d1dff6325edb492bde536f40b048eab7246c61d5c6643c696b7f" "8db4b03b9ae654d4a57804286eb3e332725c84d7cdab38463cb6b97d5762ad26" "4aee8551b53a43a883cb0b7f3255d6859d766b6c5e14bcb01bed572fcbef4328" default)))
  '(display-line-numbers-current-absolute nil)
  '(display-line-numbers-type (quote relative))
  '(evil-want-Y-yank-to-eol nil)
- '(global-whitespace-mode t)
+ '(global-whitespace-mode nil)
  '(ivy-initial-inputs-alist
    (quote
     ((counsel-minor . "^+")
@@ -541,7 +544,7 @@ through to the underlying function"
      (woman . "^"))))
  '(package-selected-packages
    (quote
-    (ggtags yapfify pyvenv pytest pyenv-mode py-isort pip-requirements live-py-mode hy-mode dash-functional cython-mode anaconda-mode pythonic jinja2-mode ansible-doc ansible yaml-mode utop tuareg caml ocp-indent merlin org-projectile org-category-capture org-present org-pomodoro alert log4e gntp org-mime org-download htmlize gnuplot wgrep smex ivy-hydra counsel-projectile counsel swiper ivy color-theme spinner evil-visualstar evil-visual-mark-mode evil-tutor evil-surround evil-mc evil-matchit evil-lisp-state evil-indent-plus evil-iedit-state iedit evil-exchange evil-ediff evil-args evil-anzu anzu evil undo-tree adaptive-wrap ws-butler winum which-key volatile-highlights vi-tilde-fringe uuidgen use-package toc-org spaceline powerline smartparens restart-emacs request rainbow-delimiters popwin persp-mode pcre2el paradox org-plus-contrib org-bullets open-junk-file neotree move-text macrostep lorem-ipsum linum-relative link-hint indent-guide hydra lv hungry-delete hl-todo highlight-parentheses highlight-numbers parent-mode highlight-indentation helm-themes helm-swoop helm-projectile projectile pkg-info epl helm-mode-manager helm-make helm-flx helm-descbinds helm-ag google-translate golden-ratio flx-ido flx fill-column-indicator fancy-battery eyebrowse expand-region exec-path-from-shell evil-unimpaired evil-search-highlight-persist highlight evil-numbers evil-nerd-commenter evil-escape goto-chg eval-sexp-fu elisp-slime-nav dumb-jump f dash s diminish define-word column-enforce-mode clean-aindent-mode bind-map bind-key auto-highlight-symbol auto-compile packed aggressive-indent ace-window ace-link ace-jump-helm-line helm avy helm-core popup async)))
+    (intero flycheck hlint-refactor hindent haskell-snippets yasnippet company-ghci company-ghc ghc company haskell-mode cmm-mode solarized-theme gruvbox-theme autothemer ggtags yapfify pyvenv pytest pyenv-mode py-isort pip-requirements live-py-mode hy-mode dash-functional cython-mode anaconda-mode pythonic jinja2-mode ansible-doc ansible yaml-mode utop tuareg caml ocp-indent merlin org-projectile org-category-capture org-present org-pomodoro alert log4e gntp org-mime org-download htmlize gnuplot wgrep smex ivy-hydra counsel-projectile counsel swiper ivy color-theme spinner evil-visualstar evil-visual-mark-mode evil-tutor evil-surround evil-mc evil-matchit evil-lisp-state evil-indent-plus evil-iedit-state iedit evil-exchange evil-ediff evil-args evil-anzu anzu evil undo-tree adaptive-wrap ws-butler winum which-key volatile-highlights vi-tilde-fringe uuidgen use-package toc-org spaceline powerline smartparens restart-emacs request rainbow-delimiters popwin persp-mode pcre2el paradox org-plus-contrib org-bullets open-junk-file neotree move-text macrostep lorem-ipsum linum-relative link-hint indent-guide hydra lv hungry-delete hl-todo highlight-parentheses highlight-numbers parent-mode highlight-indentation helm-themes helm-swoop helm-projectile projectile pkg-info epl helm-mode-manager helm-make helm-flx helm-descbinds helm-ag google-translate golden-ratio flx-ido flx fill-column-indicator fancy-battery eyebrowse expand-region exec-path-from-shell evil-unimpaired evil-search-highlight-persist highlight evil-numbers evil-nerd-commenter evil-escape goto-chg eval-sexp-fu elisp-slime-nav dumb-jump f dash s diminish define-word column-enforce-mode clean-aindent-mode bind-map bind-key auto-highlight-symbol auto-compile packed aggressive-indent ace-window ace-link ace-jump-helm-line helm avy helm-core popup async)))
  '(solarized-bold t)
  '(solarized-degrade nil)
  '(solarized-italic t)
@@ -555,19 +558,9 @@ through to the underlying function"
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(counsel-active-mode ((t (:foreground "blue"))))
- '(counsel-key-binding ((t (:foreground "magenta"))))
- '(cursor ((t (:background "#b58900"))))
- ;'(font-lock-comment-face ((t (:background "brightblack" :foreground "brightgreen" :slant italic))))
- '(helm-selection ((t (:foreground "white" :background "red" :inverse-video nil))))
- '(ivy-confirm-face ((t (:inherit minibuffer-prompt :foreground "green"))))
- '(ivy-current-match ((t (:background "black" :foreground "brightmagenta" :weight bold))))
- '(ivy-match-required-face ((t (:inherit minibuffer-prompt :foreground "red"))))
- '(ivy-minibuffer-match-face-2 ((t (:foreground "green" :weight bold))))
- '(ivy-minibuffer-match-face-3 ((t (:foreground "brightred" :weight bold))))
- '(ivy-minibuffer-match-face-4 ((t (:foreground "blue" :weight bold))))
+ '(font-lock-comment-face ((t (:background "#32302f" :foreground "#7c6f64"))))
  '(linum-relative-current-face ((t (:inherit linum))))
- '(mode-line-buffer-id ((t (:weight bold))))
+ '(mode-line-buffer-id ((t (:inherit bold :foreground "#ebdbb2"))))
  '(org-level-1 ((t (:foreground "LightSkyBlue"))))
  '(org-level-2 ((t (:foreground "LightGoldenrod"))))
  '(org-level-3 ((t (:foreground "Cyan1"))))
@@ -576,12 +569,7 @@ through to the underlying function"
  '(org-level-6 ((t (:foreground "Aquamarine"))))
  '(org-level-7 ((t (:foreground "LightSteelBlue"))))
  '(org-level-8 ((t (:foreground "LightSalmon"))))
- '(swiper-background-match-face-2 ((t (:inherit match))))
- '(swiper-background-match-face-3 ((t (:inherit isearch))))
- '(swiper-match-face-2 ((t (:inherit match))))
- '(swiper-match-face-3 ((t (:inherit isearch))))
  '(tuareg-font-lock-governing-face ((t (:weight bold :foreground "#d33682"))))
  '(whitespace-newline ((t (:foreground "black"))))
  '(whitespace-space ((t (:inherit font-lock-comment-delimiter-face))))
- '(whitespace-tab ((t (:foreground "black"))))
- )
+ '(whitespace-tab ((t (:foreground "black")))))

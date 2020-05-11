@@ -1,4 +1,3 @@
-(package-initialize)
 
 (let ((work-init "~/.emacs.d/work-init.el"))
   (when (file-exists-p work-init)
@@ -55,7 +54,7 @@
 (setq global-eldoc-mode nil)
 
 ;; Required for org-protocol to work
-(server-start)
+;;(server-start)
 
 (add-to-list 'load-path "~/.emacs.d/elisp")
 (add-to-list 'load-path "~/.emacs.d/themes")
@@ -113,18 +112,19 @@
     ))
 ;;(exec-path-from-shell-initialize)
 
+(package-initialize)
 ;; THEME
 ;;(load-theme 'jbeans t)
 ;;(load-theme 'solarized t)
 (add-to-list 'custom-theme-load-path "~/.emacs.d/themes")
-;;(load-theme 'gruvbox t)
+(load-theme 'gruvbox-dark-soft t)
 
-(add-hook 'after-make-frame-functions
-          (lambda (frame)
-            (let ((mode (if (display-graphic-p frame) 'dark 'dark)))
-              (set-frame-parameter frame 'background-mode mode)
-              (set-terminal-parameter frame 'background-mode mode))
-            (enable-theme 'solarized)))
+;(add-hook 'after-make-frame-functions
+;          (lambda (frame)
+;            (let ((mode (if (display-graphic-p frame) 'dark 'dark)))
+;              (set-frame-parameter frame 'background-mode mode)
+;              (set-terminal-parameter frame 'background-mode mode))
+;            (enable-theme 'solarized)))
 
 (require 'general)
 (require 'help-fns+)
@@ -577,7 +577,6 @@ setting the args to `-t TYPE' instead of prompting."
 ;; The first time you run C-c C-t after loading the repl, an error is thrown but after that everything works great
 (add-hook 'interactive-haskell-mode-hook '(setq haskell-doc-mode 0))
 
-
 (defun flyspell-detect-ispell-args (&optional run-together)
   "if RUN-TOGETHER is true, spell check the CamelCase words."
   (let (args)
@@ -646,11 +645,12 @@ setting the args to `-t TYPE' instead of prompting."
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(header-line ((t (:background "brightcyan" :foreground "black" :inverse-video t))))
- '(helm-selection ((t (:foreground "black"))))
- '(isearch ((t (:foreground "black" :background "yellow" :inverse-video nil))))
- '(match ((t (:background "brightcyan" :foreground "black" :inverse-video t))))
- '(region ((t (:foreground "black" :background "brightcyan" :inverse-video nil)))))
+; '(header-line ((t (:background "brightcyan" :foreground "black" :inverse-video t))))
+; '(helm-selection ((t (:foreground "black"))))
+; '(isearch ((t (:foreground "black" :background "yellow" :inverse-video nil))))
+; '(match ((t (:background "brightcyan" :foreground "black" :inverse-video t))))
+; '(region ((t (:foreground "black" :background "brightcyan" :inverse-video nil))))
+ )
 
 ;; This is a dirty hack to make the forground colors show through the
 ;; highlight due to some buggyness in the solarized theme
